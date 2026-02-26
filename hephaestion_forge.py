@@ -57,11 +57,13 @@ BACKBONE_ENGINES = {
     "AUTO01": "Automotive Engineering", "BIO01": "Biomedical Engineering",
     "CHEM01": "Chemical Engineering", "CRYPTO01": "Cryptocurrency & Blockchain",
     "DRL01": "Drilling Engineering", "EE01": "Electrical Engineering",
-    "ENRG01": "Energy & Power Systems", "ENV01": "Environmental Engineering",
+    "ENCORE01": "Surface Owner Intelligence", "ENRG01": "Energy & Power Systems",
+    "ENV01": "Environmental Engineering",
     "FOOD01": "Food Science & Technology", "FOREN01": "Forensic Science",
     "GEO01": "Geotechnical Engineering", "HIST01": "Historical Analysis",
     "HVAC01": "HVAC Engineering", "INS01": "Insurance & Risk Management",
-    "LING01": "Linguistics & NLP", "MARINE01": "Marine & Naval Engineering",
+    "LING01": "Linguistics & NLP", "LM01": "Landman & Title Examination",
+    "MARINE01": "Marine & Naval Engineering",
     "MATH01": "Mathematics", "MED01": "Medical Sciences",
     "MINE01": "Mining Engineering", "MUSIC01": "Music Theory & Production",
     "NET01": "Network Engineering", "NUC01": "Nuclear Engineering",
@@ -338,8 +340,29 @@ def build_providers(keys):
 
 
 def get_system_prompt(engine_id, domain_name):
-    return f"""You are an elite domain expert generating A++ doctrine blocks for {engine_id} ({domain_name}).
+    # Detect if this is a backbone engine (XX01 pattern or in BACKBONE_ENGINES)
+    is_backbone = engine_id in BACKBONE_ENGINES or engine_id.endswith("01")
+    prefix = re.sub(r'\d+$', '', engine_id)
+    # Find sub-engines for this backbone
+    sub_engines_note = ""
+    if is_backbone:
+        sub_engines_note = f"""
+BACKBONE ENGINE ROLE: {engine_id} is the MOST POWERFUL engine in the {domain_name} domain.
+It serves two critical functions:
+  1. DIRECT AUTHORITY: Answers queries directly with the deepest, most comprehensive expertise in {domain_name}.
+     It has broader knowledge than any sub-engine and handles complex, multi-faceted questions that span
+     the entire domain. When a query touches multiple subdomain areas, {engine_id} synthesizes the answer.
+  2. DELEGATION COMMANDER: Routes specialized queries to sub-engines ({prefix}02, {prefix}03, etc.) in its
+     domain. Each sub-engine is a specialist in one narrow area. {engine_id} knows WHAT each sub-engine
+     does and WHEN to delegate vs answer directly. It orchestrates multi-engine workflows for complex queries.
 
+Doctrines for {engine_id} must reflect this dual role — deep domain mastery PLUS delegation intelligence.
+Include cross_domain_routes that reference both sub-engines in this domain AND related backbone engines
+in other domains.
+"""
+
+    return f"""You are an elite domain expert generating A++ doctrine blocks for {engine_id} ({domain_name}).
+{sub_engines_note}
 A doctrine block is a pre-compiled DECISION FRAMEWORK — a senior expert's reasoning cached for instant deployment.
 
 MANDATORY QUALITY (A++ GRADE):
@@ -518,16 +541,24 @@ def generate_batch(engine_id, domain_name, subtopics, count, providers):
 
 def generate_routing(engine_id, domain_name, provider):
     all_eng = ", ".join(f"{k}({v})" for k, v in sorted(BACKBONE_ENGINES.items()))
+    prefix = re.sub(r'\d+$', '', engine_id)
     sys_p = f"""Generate ROUTING doctrines for {engine_id} ({domain_name}).
-These enable: domain scope awareness, cross-domain routing, sub-engine delegation,
-multi-domain decomposition, boundary detection.
-Available engines: {all_eng}"""
+
+{engine_id} is the BACKBONE ENGINE — the most powerful engine in the {domain_name} domain.
+It has two roles: (1) Answer complex queries directly with deep domain mastery, and
+(2) Delegate specialized queries to sub-engines ({prefix}02, {prefix}03, etc.) in its domain.
+
+These routing doctrines define HOW {engine_id} decides when to answer directly vs delegate,
+which sub-engines handle which specializations, and how to route cross-domain queries to
+other backbone engines.
+
+Available backbone engines across all domains: {all_eng}"""
     usr_p = f"""Generate 5 routing doctrines for {engine_id}:
-1. "[ROUTING] {engine_id} Domain Scope & Coverage Map"
-2. "[ROUTING] {engine_id} Cross-Domain Routing Matrix"
-3. "[ROUTING] {engine_id} Sub-Engine Delegation Protocol"
-4. "[ROUTING] {engine_id} Multi-Domain Query Decomposition"
-5. "[ROUTING] {engine_id} Domain Boundary Detection"
+1. "[ROUTING] {engine_id} Domain Scope & Coverage Map" — What {engine_id} covers directly, what it delegates to sub-engines, domain boundaries
+2. "[ROUTING] {engine_id} Cross-Domain Routing Matrix" — When to route to other backbone engines (e.g., {prefix}→PIPE, {prefix}→RE, etc.)
+3. "[ROUTING] {engine_id} Sub-Engine Delegation Protocol" — Decision tree: when {engine_id} answers vs delegates to {prefix}02/{prefix}03/etc. Include each sub-engine's specialization
+4. "[ROUTING] {engine_id} Multi-Domain Query Decomposition" — How to split complex queries that span multiple sub-engines or domains into coordinated sub-queries
+5. "[ROUTING] {engine_id} Domain Boundary Detection" — How to detect when a query is leaving {domain_name} territory and needs handoff to another backbone
 Same full structure as domain doctrines. Return JSON array of 5 objects."""
     return parse_doctrines(provider.generate(sys_p, usr_p, engine_id=engine_id, max_tokens=8192, temperature=0.6))[:5]
 
