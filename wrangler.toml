@@ -1,0 +1,27 @@
+name = "hephaestion-forge"
+main = "src/index.ts"
+compatibility_date = "2024-12-01"
+
+[vars]
+VERSION = "2.0.0"
+SERVICE_NAME = "hephaestion-forge"
+
+[[kv_namespaces]]
+binding = "FORGE_PROJECTS"
+id = "b512fc74aa204b0c86ad5d29a4456530"
+
+[[kv_namespaces]]
+binding = "TEMPLATE_CACHE"
+id = "82fde3291d6d4af4add3693337277153"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "hephaestion-forge"
+database_id = "0c864d89-f803-49bf-b401-416c1578333b"
+
+[[r2_buckets]]
+binding = "BUILD_OUTPUT"
+bucket_name = "echo-build-plans"
+
+[triggers]
+crons = []
