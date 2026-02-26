@@ -597,6 +597,283 @@ const ENHANCEMENT_MATRIX_CATEGORIES: Record<string, string[]> = {
   'CAT14-DX': ['onboarding', 'hot_reload', 'templates', 'cli', 'debugging', 'linting', 'formatting'],
 };
 
+// ═══════════════════════════════════════════════════════════════════════════
+// ULTRA GRAPHICS SYSTEM — Extracted from ULTRA_GRAPHICS_MEGAPROMPT_v3.1.md
+// Visual fidelity standards for UI generation, image prompts, and shaders
+// ═══════════════════════════════════════════════════════════════════════════
+
+const ULTRA_GRAPHICS_UI_SYSTEM = `ULTRA GRAPHICS — WEB UI DESIGN SYSTEM (v3.1)
+Role: Principal UI/UX engineer with shipped AAA titles (Destiny 2, Cyberpunk 2077, Diablo IV) and system-level work at Apple, Stripe, and Vercel. Non-generic, production-ready interfaces with strong visual identity and cinematic presence.
+
+═══ RESOLUTION & RENDERING STANDARDS ═══
+- Design at 2x (Retina): all measurements in logical pixels, assets at 2x minimum, 3x for iOS
+- Target displays: 5K iMac (5120×2880), 4K monitors (3840×2160), ProMotion 120Hz
+- Icon rendering: SVG-first, pixel-hinted at 16/20/24/32px, hairline details at 1px logical
+- Image assets: WebP/AVIF format, responsive srcset with 1x/2x/3x variants
+- Font rendering: subpixel antialiasing, optical sizing enabled, variable fonts preferred
+- Animation frame target: 60fps minimum, 120fps on ProMotion, no layout thrashing
+- Canvas/WebGL: render at devicePixelRatio (typically 2-3x)
+
+═══ GLASSMORPHISM & DEPTH ═══
+- backdrop-filter: blur(20px) saturate(180%) on card surfaces
+- Multi-layer glass: Background cards ~8% opacity → Foreground ~12% → Interactive ~18%
+- Borders: 1px solid rgba(255,255,255,0.06-0.10) with faint inner glow via inset shadow
+- Layered shadows (all three required):
+  Ambient: 0 4px 30px rgba(0,0,0,0.45)
+  Direct: 0 2px 8px rgba(0,0,0,0.35)
+  Contact: 0 1px 2px rgba(0,0,0,0.75)
+- Fine noise texture overlay (3-5% opacity) via CSS background-image with base64 noise SVG
+- Depth hierarchy: Maximum 5 elevation layers, each visually distinct through blur, opacity, shadow
+
+═══ COLOR SCIENCE ═══
+- Backgrounds: deep, rich tones using oklch() or hsl() for perceptual uniformity (#0a0a0f, #080b16, #05060b), never flat #000
+- Accent palette: clearly defined roles — primary, success, warning, destructive, info — each with hover/active/disabled variants
+- CTA gradients: subtle 2-stop (accent → slightly lighter) using oklch() interpolation
+- Typography opacity ladder: 100% (primary) → 72% (secondary) → 48% (tertiary) → 24% (muted) → 12% (ghost)
+- Interactive glows: box-shadow: 0 0 20px rgba(accent, 0.25), 0 0 60px rgba(accent, 0.10)
+- Color tokens: define ALL colors as CSS custom properties on :root, never hardcoded
+
+═══ TYPOGRAPHY ═══
+- Display: Inter Variable, Geist, or SF Pro Display — tight tracking (letter-spacing: -0.025em), optical sizing on
+- Body: min 16px (1rem), line-height: 1.6, font-feature-settings: 'kern', 'liga', 'calt'
+- Monospace: JetBrains Mono or Fira Code with ligatures enabled
+- Type scale: 12 / 14 / 16 / 20 / 24 / 32 / 48 / 64 / 80 / 96 — applied with clamp() for fluid scaling
+- Strong weight contrast: headings 600-700 vs body 400
+- Text rendering: -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale
+
+═══ ANIMATION & MOTION (60fps or Bust) ═══
+- Page transitions: Framer Motion spring physics (stiffness: 300, damping: 30, mass: 1), never ease-in-out for UI springs
+- Hover micro-interactions: 150-200ms ease-out, translateY(-2px), enhanced shadow + accent glow bloom
+- State changes: ~300ms with smooth opacity/position/color/blur transitions
+- Staggered reveals: ~50ms offset per item, elements enter from consistent direction (bottom-up or left-right)
+- Parallax depth in hero sections using transform: translateZ() with perspective parent
+- Skeleton loaders: shimmer animation using linear-gradient with animation: shimmer 1.5s infinite
+- Reduced motion: Always wrap animations in @media (prefers-reduced-motion: no-preference)
+- GPU acceleration: Use transform and opacity only — never animate width, height, margin, or top/left
+
+═══ LAYOUT MASTERY ═══
+- CSS Grid for macro page structure, Flexbox for component internals — never float or absolute for layout
+- Spacing scale: 4 / 8 / 12 / 16 / 24 / 32 / 48 / 64 / 96px — defined as CSS custom properties
+- Max content width: 1280px with breakpoints at 640 / 768 / 1024 / 1280 / 1536
+- Card-based layouts: consistent border-radius: 12-16px and clear vertical rhythm
+- Negative space is a FEATURE — minimum 16px padding on all containers
+- Container queries where supported for truly responsive component design
+
+═══ DARK MODE — Done Right ═══
+- Layered surfaces: Surface 0 #0a0a0f → Surface 1 #111118 → Surface 2 #1a1a24 → Surface 3 #222230 → Surface 4 #2a2a38
+- Never #000 or #fff — always slightly tinted toward the accent hue
+- Elevation = lightness (higher z-index = slightly lighter surface + slightly stronger border)
+- Borders: rgba(255,255,255, 0.06) base → 0.08 elevated → 0.12 interactive → 0.18 focused
+- WCAG AA contrast minimum everywhere, AAA preferred for body text
+
+═══ DATA VISUALIZATION ═══
+- Recharts or D3 with custom palettes derived from accent color, never library defaults
+- Gradient fills under line charts: accent at 40% opacity → transparent at bottom
+- Grid lines at 8-12% opacity, custom tooltips matching glass UI aesthetic
+- Smooth animated transitions between data states using spring interpolation
+- Axis labels: clear, unambiguous units, auto-scaling with human-readable numbers (1.2K not 1200)
+
+═══ INTERACTIVE ELEMENTS ═══
+- Buttons: gradient or solid fill, border-radius 2px larger than parent cards, press-down translateY(1px) + reduced shadow on :active
+- Inputs: understated borders (1px solid rgba(255,255,255,0.08)), focus ring with accent glow (0 0 0 2px accent), floating labels
+- Switches/toggles: 200ms spring transitions with color shift + handle motion + subtle bounce
+- Dropdowns: animated expand with backdrop blur and elevation shift
+- Modals: backdrop-filter: blur(8px) + background: rgba(0,0,0,0.6) fade, content slides up with spring, trap focus inside
+
+═══ ANTI-AI-SLOP UI CHECKLIST ═══
+REJECT any UI that has:
+- Generic blue-purple gradient backgrounds with no structure or purpose
+- Centered, unstructured text blocks with no hierarchy
+- Plain rounded rectangles with standard box-shadow and nothing else
+- Stock blob illustrations — use real data or abstract visualization
+- Huge empty whitespace with no information density or visual interest
+- Default Tailwind color palette with zero customization
+- Four identical stat cards + one chart = "dashboard" — no visual narrative
+- Lorem ipsum or placeholder content — use realistic domain-specific data
+- Identical card sizes with no visual variation or featured item treatment
+- Single-weight typography — everything looks same importance level
+- ease-in-out on everything — spring physics for UI, ease-out for exits, ease-in for entries
+- Components that don't respond to hover, focus, or active states
+
+═══ REFERENCE QUALITY TARGETS ═══
+- Linear.app — precision, density, keyboard-first, snappy, no wasted space
+- Vercel Dashboard — clarity, speed, beautiful restraint, confident typography
+- Raycast — native macOS feel, power-user oriented, buttery animations
+- Arc Browser — bold personality, inventive layouts, playful yet functional
+- Stripe Docs — hierarchy, legibility, polish, premium code blocks
+- Destiny 2 UI — cinematic atmosphere, immersive depth, sci-fi elegance
+- Cyberpunk 2077 menus — glitch FX, neon accents, layered translucent panels
+- Diablo IV UI — dark elegance, texture-rich, moody, tactile surfaces
+- Apple.com product pages — scroll-driven narrative, theatrical reveals, premium feel
+
+═══ IMPLEMENTATION CONSTRAINTS ═══
+- React + Tailwind CSS (with tailwind.config extending colors, spacing, fonts, animations) in a single JSX or HTML file
+- Framer Motion for all key animations and page transitions
+- CSS custom properties (--color-*, --space-*, --radius-*) for complete theming
+- Mobile responsive from first line of code — fluid typography with clamp(), responsive grid with auto-fit
+- Semantic HTML5 elements (nav, main, section, article, aside) and WCAG AA compliance
+- No lorem ipsum — realistic, contextual, domain-appropriate content throughout
+- All icons as inline SVG — no external image dependencies
+- Lazy loading for below-fold content`;
+
+const ULTRA_GRAPHICS_IMAGE_SYSTEM = `ULTRA GRAPHICS — IMAGE GENERATION SYSTEM (v3.1)
+Role: Elite AAA art director and VFX supervisor with deep experience in photoreal rendering, PBR shading, and cinematic storytelling. You design images that look like Unreal Engine 5 Nanite/Lumen captures, Octane/Arnold offline renders, or high-end medium format photography — never like "AI art."
+
+═══ VISUAL FIDELITY FLOOR ═══
+- Resolution: platform maximum, upscale 4x for final, target 8K+ (7680x4320) with zero aliasing or compression
+- Rendering: full path-traced GI with 2048+ samples per pixel equivalent — no fireflies, no noise, perfectly converged
+- PBR: correct roughness/metalness workflow with energy-conserving BRDFs, Cook-Torrance microfacet model, GGX
+- SSS: multi-layer with accurate mean free path (skin: 1.0mm, marble: 8.5mm, milk: 2.0mm, jade: 3.0mm)
+- Volumetrics: heterogeneous participating media — fog, god rays, atmospheric scattering (Mie + Rayleigh)
+- Micro-detail: sub-millimeter — pore-level skin (40-80um), fabric fibers (10-20um), dust particles (1-10um)
+- DOF: cinema-grade with anamorphic bokeh, cat-eye vignetting at edges, chromatic fringing on OOF highlights
+- Color pipeline: ACES with filmic tonemapping, scene-referred linear workflow, wide gamut (Rec.2020)
+
+═══ PBR MATERIAL RENDERING STACK ═══
+Metals: anisotropic reflections, micro-scratches, oils, fingerprints, oxidation patina, edge wear (IOR: gold 0.47, roughness 0.05-0.3)
+Skin: 5-layer SSS (epidermis, dermis, fat, blood, oil film), uneven tone, blemishes, pores, peach fuzz
+Fabric: visible thread/weave, fuzz/lint, realistic wrinkling, tension at seams, sheen BRDF for velvet/silk
+Glass: caustics, internal reflections, absorption color, Fresnel, surface dust (IOR: 1.45-1.9, dispersion Abbe)
+Water: waves, foam, depth absorption, caustics, Snell window (IOR: 1.33, Henyey-Greenstein phase)
+Foliage: translucency, wind deformation, vein detail, dew, chlorophyll spectrum, two-sided SSS BSDF
+Stone/Concrete: chipped edges, cracks with depth, moss/dirt, wet/dry variation (roughness 0.5-0.95)
+Wood: grain direction, knot detail, lacquer/raw, age splitting, anisotropic roughness following grain
+Leather: creasing at flex points, grain variation, edge patina, stitching (roughness 0.3-0.7)
+Hair: strand-level, Marschner BSDF, R/TT/TRT lobes, melanin-based color, elliptical cross-section
+
+═══ LIGHTING PROTOCOL (Cinematographer-grade) ═══
+- Primary: key light with specific Kelvin, direction, quality — hard (point/spot) vs soft (area/bounce)
+- Secondary: fill with complementary temperature, softer intensity, or negative fill (black card) for contrast
+- Tertiary: rim/hair light for separation — edge-lit silhouette, backlight halo, kicker for dimensional pop
+- Environmental: HDRI sky dome with explicit time-of-day, cloud cover, atmosphere
+- Practical: in-scene lights (lamps, signage, windows, flames, screens) with inverse-square falloff
+- Emissive: neon, holograms, bioluminescence — with bloom kernel, light wrap, volumetric cone
+- Bounce: visible color bleed from nearby surfaces
+
+═══ COMPOSITION RULES ═══
+- Golden ratio / rule-of-thirds / dynamic symmetry with clear leading lines
+- Layered depth: foreground interest → midground subject → background story → atmospheric fade
+- "Frame within a frame" when suitable: doorways, windows, archways, silhouettes
+- Camera angles with PURPOSE: eye-level=intimacy, low=power, high=vulnerability, Dutch=tension
+- Tonal composition: light/dark values guide the eye before color — must read clearly in grayscale
+
+═══ ALWAYS SPECIFY (8 mandatory parameters) ═══
+1. Camera body + sensor (e.g. Hasselblad X2D 100MP, ARRI Alexa 65)
+2. Lens: focal length + aperture + character (e.g. Zeiss Otus 85mm f/1.4)
+3. Focal distance + DOF
+4. Film stock / sensor profile (e.g. Kodak Portra 400, ARRI LogC4)
+5. Time of day
+6. Weather + atmosphere
+7. Scale reference (humans, vehicles, architecture)
+8. Art direction mood
+
+═══ ANTI-AI-SLOP IMAGE DIRECTIVES ═══
+NEVER allow:
+- Plastic/waxy skin — always show pores, micro-blemishes, asymmetry, peach fuzz
+- Over-saturated toy-like colors — grounded, film-based color science
+- Perfectly symmetrical faces — natural asymmetry and micro-expressions
+- Smooth featureless gradients where texture should exist
+- Floating objects, broken shadows, impossible physics
+- Empty environments — add environmental storytelling (wear, decals, history)
+- "HDR glow" on everything — bloom is selective and motivated
+- Wrong finger count, boneless hands, impossible joint angles
+- "AI shimmer" — iridescent over-sharpened quality
+- Homogeneous textures — real surfaces have macro AND micro variation
+
+═══ PLATFORM ADAPTERS ═══
+Midjourney v7+: --ar 16:9 --q 2 --s 850 --style raw --v 7
+Flux.2 Pro: width: 2304, height: 1536, steps: 50, guidance: 7.5
+SDXL: hr_scale: 2, hr_upscaler: 4x-UltraSharp, denoising: 0.35
+DALL-E 3: specify "highest available resolution, maximum detail", 1792x1024 or 1024x1792
+Leonardo AI: photoReal v2, alchemy v2, ultra quality, 1472x832
+Ideogram 2.0+: style: realistic, quality: max, 1344x768
+
+═══ QUALITY AMPLIFIER KEYWORDS (layer into every prompt) ═══
+Tier 1 Core: photorealistic, hyperrealistic, ultra-detailed, 8K UHD, RAW photo, physically accurate
+Tier 2 Tech: ray-traced GI, path-traced, UE5 Nanite/Lumen, SSS, PBR, volumetric lighting
+Tier 3 Photo: shot on Hasselblad H6D-400c, ARRI Alexa 65, Zeiss Otus prime, medium format
+Tier 4 Post: ACES color, Kodak Vision3 500T emulation, HDR10+, DaVinci Resolve grade
+Tier 5 Anti-Degrade: no compression artifacts, tack-sharp, crystal clear, pixel-perfect, no aliasing
+
+═══ ART DIRECTOR CRITIQUE FRAMEWORK ═══
+For every generated prompt, evaluate:
+SPECIFICITY: Are materials described with physical properties? Is lighting DP-grade? Camera specified fully?
+ANTI-GENERIC: Could this produce something seen 1000 times? Are there "empty calorie" words? Is there action/narrative?
+TECHNICAL: Aspect ratio appropriate? Camera setup physical? Lighting physically consistent? Material properties plausible?
+Iteration: MOODBOARD → COMPOSITION LOCK → MATERIAL POLISH → HERO SHOT`;
+
+const SHADER_EFFECTS_LIBRARY = `SHADER EFFECTS LIBRARY — AAA GUI REFERENCE (GLSL/WebGL/WebGPU)
+
+═══ PARTICLE VERTEX SHADER (GPU Animated with Simplex Noise Turbulence) ═══
+Core pattern: Simplex noise displacement + sin/cos orbital + pulsing scale
+Uniforms: uTime (float), uSize (float), uTurbulence (float)
+Attributes: aScale, aRandomness, aColor
+Key formula: pos.x += sin(uTime * aRandomness + pos.y) * 0.5 + snoise(pos * 0.5 + uTime * 0.2) * uTurbulence
+Point size: uSize * aScale * pulse * (300.0 / -mvPosition.z) for perspective scaling
+
+═══ PARTICLE FRAGMENT (Soft Glow) ═══
+Pattern: circular falloff with glow core
+float dist = length(gl_PointCoord - 0.5);
+float alpha = 1.0 - smoothstep(0.0, 0.5, dist);
+float core = 1.0 - smoothstep(0.0, 0.2, dist);
+vec3 color = vColor + vec3(core * 0.5);
+
+═══ HOLOGRAM EFFECT ═══
+Pattern: Fresnel edge glow + scan lines + flicker + glitch
+Fresnel: pow(1.0 - abs(dot(vNormal, viewDir)), 3.0)
+Scan lines: sin(vUv.y * 400.0 + uTime * 5.0) — pow(_, 1.5) * 0.3 + 0.7
+Flicker: sin(uTime * 30.0) * 0.05 + 0.95 (dual frequency for realism)
+Glitch: step(0.99, sin(uTime * 50.0)) * 0.1
+
+═══ CHROMATIC ABERRATION POST-PROCESS ═══
+Pattern: RGB channel split along direction vector
+float r = texture2D(tDiffuse, vUv + uDirection * uIntensity).r;
+float g = texture2D(tDiffuse, vUv).g;
+float b = texture2D(tDiffuse, vUv - uDirection * uIntensity).b;
+
+═══ ENERGY SHIELD / FORCE FIELD ═══
+Pattern: hexagonal tiling + Fresnel rim + pulse wave + hit ripple with exponential decay
+Hex distance: max(p.x * 0.866 + p.y * 0.5, p.y)
+Ripple: sin(hitDist * 30.0 - uHitTime * 10.0) * exp(-uHitTime * 3.0) * exp(-hitDist * 5.0)
+
+═══ CSS EFFECTS ═══
+Neon Glow: multi-layer text-shadow (5px/10px/20px/40px/80px/120px) with flicker keyframes
+Glassmorphism 2.0: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05)) + backdrop-filter: blur(20px) saturate(180%) + inset glow shadows + shine-sweep ::before animation
+Animated Gradient Border: conic-gradient(from var(--angle), #00ffff, #9900ff, #ff0055, #00ffff) on ::before pseudo + @property --angle rotation
+Glitch Text: dual ::before/::after with clip-path polygon slices + opposing translateX animations + cyan/magenta color split
+Holographic Card: tricolor gradient background + 3D perspective on hover + repeating scan-line overlay + rainbow shine sweep on hover
+
+═══ COMMON UNIFORMS REFERENCE ═══
+uTime: float — elapsed time for animation
+uResolution: vec2 — viewport dimensions
+uMouse: vec2 — normalized mouse position
+uIntensity: float — effect strength 0-1
+uColor: vec3 — base effect color
+uTexture/tDiffuse: sampler2D — input texture
+modelViewMatrix/projectionMatrix: mat4 — standard transforms
+
+═══ WEBGPU NOTES ═══
+- Replace attribute/varying with in/out and location qualifiers
+- Use storage buffers for particle data instead of attributes
+- Compute shaders for GPU particle simulation (workgroup size 64-256)
+- Bind groups replace uniform blocks: @group(0) @binding(0)
+- WGSL syntax: fn main() -> @location(0) vec4f { ... }`;
+
+type GraphicsMode = 'ui' | 'image' | 'shader' | 'art-director';
+
+function buildGraphicsContext(mode: GraphicsMode): string {
+  switch (mode) {
+    case 'ui':
+      return `\n\n--- ULTRA GRAPHICS UI DESIGN SYSTEM ---\n${ULTRA_GRAPHICS_UI_SYSTEM}`;
+    case 'image':
+      return `\n\n--- ULTRA GRAPHICS IMAGE GENERATION SYSTEM ---\n${ULTRA_GRAPHICS_IMAGE_SYSTEM}`;
+    case 'shader':
+      return `\n\n--- AAA SHADER EFFECTS LIBRARY ---\n${SHADER_EFFECTS_LIBRARY}`;
+    case 'art-director':
+      return `\n\n--- ULTRA GRAPHICS IMAGE GENERATION SYSTEM ---\n${ULTRA_GRAPHICS_IMAGE_SYSTEM}\n\n--- ART DIRECTOR MODE ---\nCritique, iterate, and systematically improve any visual prompt or output until it reaches showreel quality. Evaluate specificity, anti-generic quality, and technical accuracy. Provide: WHAT'S WORKING, WHAT'S MISSING, WHAT'S HURTING IT, then REVISED PROMPT v2 (refined), v3 (pushed to edge), and 5 VARIATION alternatives.`;
+  }
+}
+
 function buildSovereignContext(mode: 'generate' | 'review' | 'security' | 'architecture'): string {
   const base = `\n\n--- SOVEREIGN CODE SUPREMACY STANDARDS ---\n${SOVEREIGN_BLACKLIST}`;
   if (mode === 'generate') {
@@ -1149,6 +1426,7 @@ async function routeRequest(path: string, method: string, request: Request, env:
       projectTypes: Object.keys(PROJECT_ARCHETYPES).length,
       languages: Object.keys(LANGUAGE_PROFILES).length,
       designPatterns: DESIGN_PATTERNS.length,
+      graphicsSystem: true,
       timestamp: nowISO(),
     });
   }
@@ -1793,6 +2071,145 @@ async function routeRequest(path: string, method: string, request: Request, env:
     }));
 
     return jsonResponse({ batch: batchResults, total: engineIds.length, processed: Math.min(engineIds.length, 5) });
+  }
+
+  // ──── ULTRA GRAPHICS GENERATION ──────────────────────────────────────
+  if (path === '/generate/ui' && method === 'POST') {
+    const body = await request.json() as Record<string, unknown>;
+    const component = sanitize(String(body.component ?? ''), MAX_DESCRIPTION_LENGTH);
+    if (!component) return jsonResponse(makeError('component description is required', 'VALIDATION', 400), 400);
+
+    const framework = sanitize(String(body.framework ?? 'react-tailwind'), 60);
+    const theme = String(body.theme ?? 'dark') as 'light' | 'dark';
+    const features = (body.features as string[]) ?? [];
+
+    const featuresStr = features.length > 0 ? `\nRequired features: ${features.join(', ')}` : '';
+    const themeStr = theme === 'light' ? '\nDesign for LIGHT mode — invert the elevation model, use light surfaces with dark text.' : '\nDesign for DARK mode — layered dark surfaces per the dark mode protocol.';
+
+    // Enrich with frontend/gamedev doctrines
+    const uiDoctrines = await queryTopicDoctrines(`UI component ${component} ${framework}`, 'frontend', env, 3);
+    const uiEnrichment = uiDoctrines ? `\n\nRelevant frontend engineering doctrines:\n${uiDoctrines}` : '';
+
+    const graphicsCtx = buildGraphicsContext('ui');
+    const sovereignCtx = buildSovereignContext('generate');
+
+    const result = await callLLM(
+      `Generate a production-quality UI component: "${component}"\n\nFramework: ${framework}\nTheme: ${theme}${featuresStr}${themeStr}\n\nReturn a JSON object with:\n- "component": component name\n- "code": complete self-contained code (React+Tailwind+Framer Motion)\n- "styles": any additional CSS custom properties or Tailwind config extensions\n- "accessibility_notes": WCAG compliance notes\n- "design_system_compliance": which ULTRA GRAPHICS rules were applied`,
+      `You are a principal UI engineer building ULTRA GRAPHICS standard components. Every component must meet the glassmorphism, color science, typography, animation, and anti-AI-slop standards. Return valid JSON only.${graphicsCtx}${sovereignCtx}${uiEnrichment}`,
+      env, 'azure', 8192,
+    );
+
+    let parsed: Record<string, unknown> = {};
+    try {
+      const jsonMatch = result.content.match(/\{[\s\S]*\}/);
+      if (jsonMatch) parsed = JSON.parse(jsonMatch[0]);
+    } catch {
+      parsed = { component, code: result.content, styles: '', accessibility_notes: 'Parse failed — raw output returned', design_system_compliance: [] };
+    }
+
+    return jsonResponse({
+      ...parsed,
+      framework,
+      theme,
+      features,
+      graphics_system: 'ULTRA_GRAPHICS_v3.1',
+      llm: { provider: result.provider, model: result.model, tokensUsed: result.tokensUsed, latencyMs: result.latencyMs },
+    });
+  }
+
+  if (path === '/generate/graphics' && method === 'POST') {
+    const body = await request.json() as Record<string, unknown>;
+    const subject = sanitize(String(body.subject ?? ''), MAX_DESCRIPTION_LENGTH);
+    if (!subject) return jsonResponse(makeError('subject description is required', 'VALIDATION', 400), 400);
+
+    const style = sanitize(String(body.style ?? 'photorealistic'), 200);
+    const platform = String(body.platform ?? 'midjourney') as 'midjourney' | 'flux' | 'sdxl' | 'dalle';
+    const aspectRatio = sanitize(String(body.aspect_ratio ?? '16:9'), 20);
+
+    // Enrich with relevant gamedev/frontend doctrines for visual content
+    const gfxDoctrines = await queryTopicDoctrines(`visual ${subject} ${style} rendering`, 'gamedev', env, 3);
+    const gfxEnrichment = gfxDoctrines ? `\n\nRelevant visual engineering doctrines:\n${gfxDoctrines}` : '';
+
+    const graphicsCtx = buildGraphicsContext('image');
+
+    const platformAdapterMap: Record<string, string> = {
+      midjourney: '--ar 16:9 --q 2 --s 850 --style raw --v 7',
+      flux: 'width: 2304, height: 1536, steps: 50, guidance: 7.5',
+      sdxl: 'hr_scale: 2, hr_upscaler: 4x-UltraSharp, denoising: 0.35',
+      dalle: 'highest available resolution, maximum detail, 1792x1024',
+    };
+
+    const result = await callLLM(
+      `Generate a production-quality image prompt for: "${subject}"\n\nStyle: ${style}\nPlatform: ${platform}\nAspect ratio: ${aspectRatio}\n\nReturn a JSON object with:\n- "prompt": single clean paragraph with all 8 mandatory parameters (camera, lens, focal distance, film stock, time of day, weather, scale reference, mood) + quality amplifier keywords stacked aggressively\n- "negative_prompt": platform-appropriate negative prompt from the Anti-AI-Slop bank\n- "parameters": platform-specific settings as key-value pairs\n- "platform_adapter": ready-to-use platform suffix string`,
+      `You are an elite AAA art director creating image prompts that produce Unreal Engine 5 / Octane / medium format photography quality. Never generic. Every detail is intentional and grounded. Return valid JSON only.${graphicsCtx}${gfxEnrichment}`,
+      env, 'azure', 4096,
+    );
+
+    let parsed: Record<string, unknown> = {};
+    try {
+      const jsonMatch = result.content.match(/\{[\s\S]*\}/);
+      if (jsonMatch) parsed = JSON.parse(jsonMatch[0]);
+    } catch {
+      parsed = { prompt: result.content, negative_prompt: '', parameters: {}, platform_adapter: platformAdapterMap[platform] ?? '' };
+    }
+
+    return jsonResponse({
+      ...parsed,
+      subject,
+      style,
+      platform,
+      aspect_ratio: aspectRatio,
+      platform_defaults: platformAdapterMap[platform] ?? '',
+      graphics_system: 'ULTRA_GRAPHICS_v3.1',
+      llm: { provider: result.provider, model: result.model, tokensUsed: result.tokensUsed, latencyMs: result.latencyMs },
+    });
+  }
+
+  if (path === '/generate/shader' && method === 'POST') {
+    const body = await request.json() as Record<string, unknown>;
+    const effect = sanitize(String(body.effect ?? ''), MAX_DESCRIPTION_LENGTH);
+    if (!effect) return jsonResponse(makeError('effect description is required', 'VALIDATION', 400), 400);
+
+    const target = String(body.target ?? 'webgl2') as 'webgl' | 'webgl2' | 'webgpu';
+    const animated = body.animated !== false;
+
+    // Enrich with gamedev doctrines
+    const shaderDoctrines = await queryTopicDoctrines(`shader ${effect} ${target} graphics`, 'gamedev', env, 3);
+    const shaderEnrichment = shaderDoctrines ? `\n\nRelevant graphics engineering doctrines:\n${shaderDoctrines}` : '';
+
+    const graphicsCtx = buildGraphicsContext('shader');
+    const sovereignCtx = buildSovereignContext('generate');
+
+    const targetNotes = target === 'webgpu'
+      ? '\nUse WGSL syntax: fn main() -> @location(0) vec4f, @group/@binding for uniforms, compute shaders for particle sim.'
+      : target === 'webgl2'
+        ? '\nUse GLSL ES 3.0: #version 300 es, in/out qualifiers, texture() instead of texture2D().'
+        : '\nUse GLSL ES 1.0: attribute/varying, texture2D(), gl_FragColor.';
+
+    const animatedNote = animated ? '\nInclude uTime uniform and time-based animation. All motion must be smooth and 60fps-capable.' : '\nStatic shader — no time-based animation.';
+
+    const result = await callLLM(
+      `Generate a production-quality ${target} shader for this effect: "${effect}"\n\nTarget: ${target}${targetNotes}${animatedNote}\n\nReturn a JSON object with:\n- "vertex_shader": complete vertex shader source code\n- "fragment_shader": complete fragment shader source code\n- "uniforms": array of { name: string, type: string, description: string, default_value: string }\n- "usage_notes": integration notes (how to set up buffers, bind uniforms, render loop)`,
+      `You are a AAA technical artist and graphics programmer writing production shader code. Use physically-based techniques. Reference the shader effects library for common patterns. Return valid JSON only.${graphicsCtx}${sovereignCtx}${shaderEnrichment}`,
+      env, 'azure', 8192,
+    );
+
+    let parsed: Record<string, unknown> = {};
+    try {
+      const jsonMatch = result.content.match(/\{[\s\S]*\}/);
+      if (jsonMatch) parsed = JSON.parse(jsonMatch[0]);
+    } catch {
+      parsed = { vertex_shader: '', fragment_shader: result.content, uniforms: [], usage_notes: 'Parse failed — raw output returned' };
+    }
+
+    return jsonResponse({
+      ...parsed,
+      effect,
+      target,
+      animated,
+      graphics_system: 'ULTRA_GRAPHICS_v3.1',
+      llm: { provider: result.provider, model: result.model, tokensUsed: result.tokensUsed, latencyMs: result.latencyMs },
+    });
   }
 
   // ──── 404 ─────────────────────────────────────────────────────────────
