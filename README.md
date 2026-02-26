@@ -1,428 +1,359 @@
-# Hephaestion Forge v5.0
+# Hephaestion Forge
 
-**A++ Grade Doctrine Regeneration Engine for Echo Engine Runtime**
+**v2.0.0 -- AI Software Factory / Autonomous Code Builder**
 
-Hephaestion is a high-throughput, multi-LLM doctrine forge that rebuilds all 2,614+ engines in the Echo Engine Runtime database with TIE Gold Standard quality. It uses a swarm of 37+ LLM providers firing in parallel to generate deeply reasoned, domain-expert doctrine blocks — then scores, filters, deduplicates, and inserts them directly into Cloudflare D1.
+[![Live](https://img.shields.io/badge/status-live-brightgreen)](https://hephaestion-forge.bmcii1976.workers.dev/health)
+[![Version](https://img.shields.io/badge/version-2.0.0-blue.svg)](https://hephaestion-forge.bmcii1976.workers.dev/health)
+[![Cloudflare Workers](https://img.shields.io/badge/platform-Cloudflare%20Workers-F38020?logo=cloudflare&logoColor=white)](https://workers.cloudflare.com)
+[![TypeScript](https://img.shields.io/badge/language-TypeScript-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
+[![Engines](https://img.shields.io/badge/Engine%20Runtime-2%2C632%20engines-8B00FF)](#engine-runtime-integration)
+[![Archetypes](https://img.shields.io/badge/archetypes-15-orange.svg)](#project-archetypes)
+[![Quality Gates](https://img.shields.io/badge/quality%20gates-6-green.svg)](#quality-gates)
+[![License](https://img.shields.io/badge/license-Proprietary-red.svg)](#license)
 
-Named after Alexander the Great's most trusted general, Hephaestion executes the full doctrine rebuild campaign across 210+ domain categories.
+13-stage build pipeline, 6 quality gates, 15 project archetypes, 5 language profiles, 8 design patterns, multi-LLM swarm with consensus -- now enriched with 202,751 real software engineering doctrines from the Echo Engine Runtime.
+
+**Live:** `https://hephaestion-forge.bmcii1976.workers.dev`
+
+*Named after Hephaestion, Alexander the Great's most trusted companion -- the builder that executes the architect's vision with absolute fidelity.*
 
 ---
 
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                  HEPHAESTION FORGE v5.0                  │
-│                                                         │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐              │
-│  │  Fork A  │  │  Fork B  │  │  Fork C  │  ...         │
-│  │ idx 0-N  │  │ idx N-M  │  │ idx M-K  │              │
-│  └────┬─────┘  └────┬─────┘  └────┬─────┘              │
-│       │              │              │                    │
-│       ▼              ▼              ▼                    │
-│  ┌──────────────────────────────────────────────┐       │
-│  │         37+ LLM PROVIDER SWARM               │       │
-│  │                                              │       │
-│  │  TIER 1: Azure GPT-4.1 / GPT-4o (FREE)      │       │
-│  │  TIER 1: GitHub Models (6 models, FREE)      │       │
-│  │  TIER 2: 18× OpenRouter paid keys            │       │
-│  │  TIER 2: DeepSeek V3 / Together / Groq       │       │
-│  │  TIER 2: xAI Grok-3-mini / Mistral / etc.   │       │
-│  │  TIER 3: Gemini 2.0 Flash direct             │       │
-│  │  BONUS: OpenRouter free models               │       │
-│  └────────────────────┬─────────────────────────┘       │
-│                       │                                  │
-│                       ▼                                  │
-│  ┌──────────────────────────────────────────────┐       │
-│  │         QUALITY PIPELINE                     │       │
-│  │                                              │       │
-│  │  Score 0-15 → Filter ≥8 → Dedup → Grade     │       │
-│  │  A++ (min≥10) | A+ (min≥8) | A | B | F      │       │
-│  │  Gap fill with backup provider if short      │       │
-│  └────────────────────┬─────────────────────────┘       │
-│                       │                                  │
-│                       ▼                                  │
-│  ┌──────────────────────────────────────────────┐       │
-│  │         D1 DIRECT WRITE                      │       │
-│  │                                              │       │
-│  │  echo-engine-doctrines (Cloudflare D1)       │       │
-│  │  Batch INSERT via wrangler CLI               │       │
-│  │  10 doctrines per SQL file                   │       │
-│  └──────────────────────────────────────────────┘       │
-└─────────────────────────────────────────────────────────┘
+                      Hephaestion Forge v2.0.0
+ +----------------------------------------------------------------+
+ |                   Cloudflare Workers Edge                        |
+ |                                                                  |
+ |  "Build me a Discord bot that tracks crypto prices"              |
+ |       |                                                          |
+ |       v                                                          |
+ |  Intent Classifier --> Archetype Selector --> Pipeline            |
+ |       |                      |                                   |
+ |       v                      v                                   |
+ |  Echo Engine Runtime    13-Stage Pipeline                        |
+ |  2,632 engines          + 6 Quality Gates                       |
+ |  202K+ doctrines                                                 |
+ |       |                      |                                   |
+ |       v                      v                                   |
+ |  Doctrine Enrichment    Multi-LLM Swarm                         |
+ |  (real CS expertise)    Azure / DeepSeek / Groq / Grok          |
+ |       |                      |                                   |
+ |       +----------+-----------+                                   |
+ |                  |                                               |
+ |                  v                                               |
+ |           Generated Project (10-50 files)                        |
+ |           Complete, tested, deployable                            |
+ +----------------------------------------------------------------+
 ```
 
 ---
 
-## LLM Provider Arsenal
+## Engine Runtime Integration
 
-Hephaestion uses every available LLM endpoint to maximize throughput. Providers are organized into tiers by reliability and cost:
+Every code generation, security audit, architecture design, and code review call is enriched with real software engineering doctrines from the Echo Engine Runtime -- 2,632 engines, 202,751 doctrine blocks, 210 domain categories.
 
-### Tier 1 — FREE, High Reliability (Primary Workhorses)
+### Data Flow
 
-| Provider | Models | Auth | Notes |
-|----------|--------|------|-------|
-| **Azure OpenAI** | GPT-4.1, GPT-4.1-mini, GPT-4o | `api-key` header | EchoOMEGA subscription, FREE, best JSON compliance |
-| **GitHub Models** | GPT-4.1, GPT-4.1-mini, GPT-4o, DeepSeek-V3, Grok-3-mini, Llama-405B | Bearer token | FREE inference API, rate-limited |
+```
+User Prompt --> Archetype Detection --> Engine Category Mapping
+                                            |
+                       +--------------------+--------------------+
+                       |                    |                    |
+                   PROG/DEVOPS          CLOUD/NET            CYBER/TEST
+                       |                    |                    |
+                       v                    v                    v
+               Engine Runtime API    Engine Runtime API    Engine Runtime API
+               (real doctrines)     (real doctrines)     (real doctrines)
+                       |                    |                    |
+                       +--------------------+--------------------+
+                                            |
+                                            v
+                               LLM Prompt + Doctrine Context
+                                            |
+                                            v
+                                  Generated Code Module
+                              (grounded in real CS expertise)
+```
 
-### Tier 2 — Paid/Direct API
+### Project-Type-to-Category Mappings
 
-| Provider | Models | Auth | Notes |
-|----------|--------|------|-------|
-| **OpenRouter (Paid)** | Gemini 2.0 Flash | Bearer token | 18 independent API keys for parallel throughput |
-| **DeepSeek** | DeepSeek-V3 | Bearer token | Direct API, strong reasoning |
-| **Together AI** | Llama-3.3-70B-Instruct-Turbo | Bearer token | Fast inference |
-| **Groq** | Llama-3.3-70B-Versatile | Bearer token | LPU inference, sub-second tokens |
-| **xAI** | Grok-3-mini-beta | Bearer token | Good reasoning quality |
-| **Mistral** | Mistral-Large-Latest | Bearer token | Strong multilingual |
-| **Fireworks** | Llama-3.3-70B | Bearer token | Fast API |
-| **SambaNova** | Meta-Llama-3.3-70B-Instruct | Bearer token | Custom silicon |
+| Project Type | Engine Categories |
+|-------------|-------------------|
+| Python App | PROG, DEVOPS, TEST, SAAS |
+| Electron App | PROG, UIUX, DESKTOP, TEST |
+| Web App | WEBAPP, UIUX, PROG, SAAS, CLOUD |
+| CLI Tool | PROG, DEVOPS, TEST |
+| MCP Server | PROG, AIML, CLOUD, DEVOPS |
+| API Service | PROG, CLOUD, DEVOPS, NET, SAAS |
+| GUI Application | PROG, UIUX, DESKTOP, TEST |
+| Automation Script | PROG, DEVOPS, DATENG, TEST |
+| Cloudflare Worker | CLOUD, PROG, DEVOPS, NET, SAAS |
+| Discord Bot | PROG, CLOUD, NET |
+| Telegram Bot | PROG, CLOUD, NET |
+| Browser Extension | WEBAPP, UIUX, PROG, CYBER |
+| Mobile App | MOBILE, UIUX, PROG, TEST |
+| Chrome Extension | WEBAPP, UIUX, PROG, CYBER |
+| VS Code Extension | PROG, DEVOPS, UIUX |
 
-### Tier 3 — Gemini Direct
+### Topic-to-Category Mappings
 
-| Provider | Models | Auth | Notes |
-|----------|--------|------|-------|
-| **Google Gemini** | Gemini 2.0 Flash | API key in URL | Direct Generative Language API |
+| Topic | Engine Categories |
+|-------|-------------------|
+| Security | CYBER, PROG, NET |
+| Database | DATENG, PROG, CLOUD |
+| Testing | TEST, PROG, DEVOPS |
+| Deployment | DEVOPS, CLOUD, SAAS |
+| Architecture | PROG, CLOUD, SAAS, DEVOPS |
+| Performance | PROG, CLOUD, NET |
+| AI / ML | AIML, DATENG, PROG |
+| Frontend | WEBAPP, UIUX, PROG |
+| Mobile | MOBILE, UIUX, PROG |
+| API | PROG, NET, CLOUD |
+| DevOps | DEVOPS, CLOUD, PROG |
+| Microservices | CLOUD, DEVOPS, NET, PROG |
+| Blockchain | CRYPTO, PROG, CYBER |
+| Game Dev | GAMEDEV, PROG, UIUX |
 
-### Bonus — OpenRouter Free Models
+### Engine Runtime Endpoints
 
-| Provider | Models | Notes |
-|----------|--------|-------|
-| **OpenRouter Free** | Llama-3.3-70B, Gemma-3-27B | Heavily rate-limited, opportunistic use |
-
-**Provider Intelligence:**
-- Auto-disables providers after 2 permanent failures (401/402/403)
-- Tracks success rate, average latency, total chars, and doctrines produced per provider
-- Randomizes provider selection to distribute load evenly
-- Falls back to fewer providers gracefully if keys are exhausted
-- Logs all LLM calls with full telemetry for the live monitor
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST` | `/engines/query` | Query doctrines by project type and prompt |
+| `GET` | `/engines/domains` | List all project-type and topic mappings |
+| `POST` | `/engines/topic` | Query doctrines by programming topic |
 
 ---
 
-## Doctrine Structure
+## Project Archetypes
 
-Each doctrine is a 14+ field pre-compiled expert reasoning block following the TIE Gold Standard:
+15 archetypes define the scaffold, language, dependencies, and build configuration:
 
-```json
-{
-  "topic": "Fatigue Life in Welded Joints Under Variable Amplitude Loading",
-  "keywords": ["fatigue crack propagation", "S-N curve", "Miner's rule", "AWS D1.1", "stress concentration factor", "weld toe geometry"],
-  "conclusion": "3-5 authoritative sentences with specific recommendations...",
-  "reasoning": "300-600 word structured analysis: issue framing → standards → methodology → decision factors → adversary position → resolution → confidence",
-  "key_factors": ["Factor 1 with explanation", "Factor 2...", "...5-8 factors"],
-  "authorities": ["ASME BPVC Section VIII — pressure vessel design", "API 579-1 — fitness for service", "...3-5 real citations"],
-  "burden_holder": "Who bears responsibility",
-  "adversary_position": "Strongest opposing argument (2-3 sentences)",
-  "counter_arguments": ["Counter 1", "Counter 2", "...3-5 arguments"],
-  "resolution_strategy": "Specific actionable steps (3-5 sentences)",
-  "entity_scope": "What entities/situations this applies to",
-  "confidence": "DEFENSIBLE | AGGRESSIVE | DISCLOSURE | HIGH_RISK",
-  "confidence_stratification": "Rating + reasoning",
-  "controlling_precedent": "Single most authoritative source",
-  "zone": "PLANNING | REPORTING | AUDIT",
-  "cross_domain_routes": "[{\"engine\": \"MECH01\", \"relevance\": \"high\"}]",
-  "domain_scope": "Subdomain areas covered"
-}
-```
-
-### Quality Scoring (0-15 scale)
-
-| Criterion | Points | Threshold |
-|-----------|--------|-----------|
-| Reasoning depth | 0-3 | ≥500 chars = 3, ≥300 = 2, ≥100 = 1 |
-| Standards citations in reasoning | 0-1 | Contains ASME/API/ISO/IEEE/etc. |
-| Conclusion depth | 0-2 | ≥200 chars = 2, ≥100 = 1 |
-| Key factors count | 0-2 | ≥5 = 2, ≥3 = 1 |
-| Authorities count | 0-2 | ≥3 = 2, ≥1 = 1 |
-| Keywords count | 0-1 | ≥6 = 1 |
-| Topic specificity | 0-1 | ≥20 chars = 1 |
-| Burden holder | 0-1 | ≥10 chars = 1 |
-| Adversary position | 0-1 | ≥30 chars = 1 |
-| Counter arguments | 0-1 | ≥3 items = 1 |
-
-**Grade Thresholds:**
-- **A++**: All doctrines score ≥ 10 (target)
-- **A+**: All doctrines score ≥ 8
-- **A**: Average score ≥ 8
-- **B**: Relaxed filter (min score 5), used when initial batch falls short
-- **F**: No doctrines passed quality filter
+| # | Archetype | Language | Framework | Use Case |
+|:-:|-----------|----------|-----------|----------|
+| 1 | `PYTHON_APP` | Python 3.11+ | -- | General Python application |
+| 2 | `ELECTRON_APP` | TypeScript | Electron | Desktop GUI application |
+| 3 | `WEB_APP` | TypeScript | Next.js | Full-stack web application |
+| 4 | `CLI_TOOL` | Python 3.11+ | Click/Typer | Command-line interface tool |
+| 5 | `MCP_SERVER` | Python 3.11+ | MCP SDK | Model Context Protocol server |
+| 6 | `API_SERVICE` | Python 3.11+ | FastAPI | RESTful API service |
+| 7 | `GUI_APPLICATION` | Python 3.11+ | PyQt6/Tkinter | Desktop GUI (Python-native) |
+| 8 | `AUTOMATION_SCRIPT` | Python 3.11+ | -- | Task automation / batch scripts |
+| 9 | `CLOUDFLARE_WORKER` | TypeScript | Hono | Cloudflare Workers edge service |
+| 10 | `DISCORD_BOT` | TypeScript | discord.js | Discord bot with slash commands |
+| 11 | `TELEGRAM_BOT` | Python 3.11+ | python-telegram-bot | Telegram bot |
+| 12 | `BROWSER_EXTENSION` | TypeScript | -- | Browser extension (Chrome/Firefox) |
+| 13 | `MOBILE_APP` | TypeScript | React Native | Cross-platform mobile app |
+| 14 | `CHROME_EXTENSION` | TypeScript | -- | Chrome extension (Manifest V3) |
+| 15 | `VSCODE_EXTENSION` | TypeScript | VS Code API | VS Code extension |
 
 ---
 
-## Pipeline Per Engine
+## Build Pipeline
 
-Each engine goes through this pipeline:
+13 stages transform a natural language description into a complete project:
 
-```
-1. PURGE (optional)
-   └─ DELETE low-quality doctrines (reasoning NULL or < 50 chars)
-
-2. EXPAND SUBDOMAINS
-   └─ Ask reliable provider for 45 highly specific subtopics
-   └─ Fallback to 35 generic templates if LLM fails
-
-3. BATCH 1 (30 doctrines target)
-   ├─ Split subtopics into chunks
-   ├─ Dispatch chunks to up to 15 parallel LLM workers
-   ├─ Parse JSON responses (handles markdown wrapping, XML tags)
-   ├─ Score all candidates (0-15 scale)
-   ├─ Filter: deduplicate by topic hash, require score ≥ 8
-   ├─ Gap fill if insufficient (call backup provider)
-   └─ INSERT into D1 in batches of 10
-
-4. BATCH 2 (30 doctrines target)
-   └─ Same pipeline with remaining subtopics
-
-5. ROUTING DOCTRINES (backbone engines only)
-   ├─ Domain Scope & Coverage Map
-   ├─ Cross-Domain Routing Matrix
-   ├─ Sub-Engine Delegation Protocol
-   ├─ Multi-Domain Query Decomposition
-   └─ Domain Boundary Detection
-
-6. SWARM QA
-   └─ Sample 3 doctrines → echo-swarm-brain.bmcii1976.workers.dev
-   └─ Trinity/consult endpoint rates 1-10
-
-7. LOG COMPLETION
-   └─ Total doctrines, QA score, grade, elapsed time
-```
+| Stage | Name | Output |
+|:-----:|------|--------|
+| 1 | Requirements Analysis | Structured requirements, archetype selection |
+| 2 | Architecture Design | Module graph, pattern selection |
+| 3 | Scaffold Generation | Project skeleton (10-20 files) |
+| 4 | Core Logic | Business logic with full implementation |
+| 5 | API Layer | HTTP routes, middleware, validation |
+| 6 | Data Layer | Database models, repositories, migrations |
+| 7 | Test Generation | Unit and integration tests |
+| 8 | Documentation | README, API docs, inline comments |
+| 9 | Configuration | Environment configs, feature flags |
+| 10 | CI/CD Pipeline | GitHub Actions, Docker, deploy scripts |
+| 11 | Quality Gates | 6-gate quality report card |
+| 12 | Code Review | LLM-powered review with fix suggestions |
+| 13 | Package | Bundled deliverable archive (R2) |
 
 ---
 
-## Multi-Fork Parallel Execution
+## Quality Gates
 
-The engine queue can be split across independent processes (forks) for concurrent building:
+6 gates enforce production-readiness (0-100 score each):
 
-```
-Fork A: engines[0:1308]     ─── Process 1 ───▶ forge_A.jsonl
-Fork B: engines[1308:2614]  ─── Process 2 ───▶ forge_B.jsonl
-Fork C: engines[gap]        ─── Process 3 ───▶ forge_C.jsonl
-```
-
-Each fork:
-- Runs as an independent Python process
-- Writes to its own JSONL log file
-- Shares the same LLM provider pool (rate limits apply across forks)
-- Can be started/stopped independently
-- The monitor aggregates all fork logs into a single dashboard
+| Gate | Category | Pass Threshold | Weight |
+|------|----------|:--------------:|:------:|
+| **CAT1-CODE** | Code Quality | 70 | 25% |
+| **CAT2-PERF** | Performance | 60 | 15% |
+| **CAT3-SEC** | Security | 80 | 25% |
+| **CAT5-ARCH** | Architecture | 65 | 15% |
+| **CAT7-TEST** | Testing | 60 | 10% |
+| **CAT8-DOCS** | Documentation | 50 | 10% |
 
 ---
 
-## Files
+## Language Toolchains
 
-| File | Lines | Description |
-|------|-------|-------------|
-| `hephaestion_forge.py` | 852 | Main forge engine — providers, pipeline, D1 writes |
-| `forge_monitor.py` | 278 | Live terminal dashboard — reads JSONL from all forks |
+| Language | Linter | Type Checker | Test Runner | Formatter |
+|----------|--------|-------------|-------------|-----------|
+| **Python 3.11+** | ruff | mypy | pytest | ruff format |
+| **TypeScript 5.x** | eslint | tsc (strict) | vitest | prettier |
+| **JavaScript ES2022+** | eslint | -- | jest | prettier |
+| **Rust 2021** | clippy | rustc | cargo test | rustfmt |
+| **Go 1.21+** | golangci-lint | go vet | go test | gofmt |
 
 ---
 
-## Usage
+## Design Patterns
 
-### Full Rebuild (all engines)
+8 patterns automatically selected based on project requirements:
+
+| Pattern | When Used |
+|---------|-----------|
+| **Repository** | Data-heavy apps, API services |
+| **Factory** | Multiple similar object types |
+| **Strategy** | Interchangeable algorithms |
+| **Observer** | Event-driven, real-time systems |
+| **Circuit Breaker** | External service calls |
+| **Middleware Chain** | HTTP APIs, processing pipelines |
+| **Builder** | Complex object construction |
+| **Adapter** | Integration, legacy wrapping |
+
+---
+
+## Multi-LLM Swarm
+
+| Provider | Model | Role | Cost |
+|----------|-------|------|:----:|
+| **Azure GPT-4.1** | gpt-4.1 | Primary code generation | FREE |
+| **Azure GPT-4.1-mini** | gpt-4.1-mini | Fast iterations, simple modules | FREE |
+| **DeepSeek V3** | deepseek-chat | Complex logic, algorithms | Low |
+| **Groq** | llama-3.3-70b | Fast code review, linting | FREE |
+| **xAI Grok 3** | grok-3 | Architecture, creative solutions | Low |
+| **OpenRouter** | Multiple | Fallback, specialized models | Varies |
+
+LLM consensus: For critical decisions (architecture, security), multiple models are queried and results are merged.
+
+---
+
+## API Reference
+
+### System
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/health` | Status, version, pipeline info, LLM availability |
+| `GET` | `/stats` | Build statistics (projects, success rate, avg time) |
+| `GET` | `/archetypes` | All 15 project archetypes |
+| `GET` | `/patterns` | All 8 design patterns |
+| `GET` | `/toolchains` | All 5 language toolchains |
+| `GET` | `/gates` | All 6 quality gates with thresholds |
+
+### Build
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST` | `/forge` | Main build -- describe what to build |
+| `POST` | `/forge/continue` | Continue multi-turn conversation |
+| `GET` | `/forge/:session_id` | Get build session state |
+| `POST` | `/forge/:session_id/advance` | Advance to next pipeline stage |
+| `POST` | `/forge/:session_id/regen` | Regenerate a specific stage |
+
+### Code Generation
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST` | `/generate/scaffold` | Project scaffold only |
+| `POST` | `/generate/module` | Single code module |
+| `POST` | `/generate/tests` | Tests for existing code |
+| `POST` | `/generate/docs` | Documentation from code |
+| `POST` | `/generate/config` | Config files |
+| `POST` | `/generate/cicd` | CI/CD pipeline |
+
+### Quality and Review
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST` | `/quality/check` | Run all 6 quality gates |
+| `POST` | `/quality/lint` | CAT1-CODE lint check |
+| `POST` | `/quality/security` | CAT3-SEC security scan |
+| `POST` | `/quality/review` | LLM-powered code review |
+
+### Engine Runtime
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST` | `/engines/query` | Query doctrines by project type |
+| `GET` | `/engines/domains` | Project-type and topic category mappings |
+| `POST` | `/engines/topic` | Query doctrines by programming topic |
+
+### Doctrine Generation
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST` | `/doctrines/generate` | Generate TIE-grade doctrine blocks |
+| `POST` | `/doctrines/batch` | Batch generate for multiple engines |
+
+---
+
+## Infrastructure
+
+| Resource | Type | Details |
+|----------|------|---------|
+| **Runtime** | Cloudflare Workers | TypeScript, global edge |
+| **Database** | D1 `hephaestion-forge` | Build history, quality gate results |
+| **KV** | `FORGE_PROJECTS` | Active project state |
+| **KV** | `TEMPLATE_CACHE` | Framework template cache |
+| **Storage** | R2 `echo-build-plans` | Generated project archives |
+
+---
+
+## Quick Start
 
 ```bash
-python -u hephaestion_forge.py --all-engines --purge-first
+# Health check
+curl https://hephaestion-forge.bmcii1976.workers.dev/health
+
+# Build a complete project
+curl -X POST https://hephaestion-forge.bmcii1976.workers.dev/forge \
+  -H "Content-Type: application/json" \
+  -d '{"prompt": "Build a Cloudflare Worker URL shortener with KV storage and click analytics", "archetype": "CLOUDFLARE_WORKER"}'
+
+# Query engine doctrines for security topic
+curl -X POST https://hephaestion-forge.bmcii1976.workers.dev/engines/topic \
+  -H "Content-Type: application/json" \
+  -d '{"query": "input validation best practices", "topic": "security"}'
+
+# Run quality gates on code
+curl -X POST https://hephaestion-forge.bmcii1976.workers.dev/quality/check \
+  -H "Content-Type: application/json" \
+  -d '{"code": "from fastapi import FastAPI\n...", "language": "python"}'
 ```
 
-### Specific Engines
+---
+
+## Development
 
 ```bash
-python -u hephaestion_forge.py --engines ACCT01,ACCT02,LM01,LM02
-```
-
-### Routing Doctrines Only
-
-```bash
-python -u hephaestion_forge.py --all-engines --routing-only
-```
-
-### Multi-Fork Mode
-
-```bash
-# Fork A: first half
-python -u hephaestion_forge.py --all-engines --start-at 0 --end-at 1308 \
-  --log-file forge_A.jsonl --purge-first
-
-# Fork B: second half
-python -u hephaestion_forge.py --all-engines --start-at 1308 \
-  --log-file forge_B.jsonl --purge-first
-
-# Fork C: targeted gap or priority engines
-python -u hephaestion_forge.py --all-engines --start-at 1308 --end-at 1387 \
-  --log-file forge_C.jsonl --purge-first
-```
-
-### CLI Arguments
-
-| Argument | Description |
-|----------|-------------|
-| `--engines` | Comma-separated engine IDs to forge |
-| `--all-engines` | Fetch all engine IDs from D1 and forge sequentially |
-| `--start-at N` | Start at engine index N (0-based) in sorted list |
-| `--end-at N` | End at engine index N (exclusive, 0 = all remaining) |
-| `--purge-first` | Delete low-quality doctrines before regeneration |
-| `--routing-only` | Generate only 5 routing doctrines per engine (skip domain doctrines) |
-| `--log-file PATH` | Override JSONL log file path (required for multi-fork) |
-
-### Monitor
-
-```bash
-# Auto-refresh every 3 seconds
-python -u forge_monitor.py --refresh 3
-
-# Single snapshot
-python -u forge_monitor.py --once
+npm install
+npm run dev          # Local development
+npx wrangler deploy  # Deploy to Cloudflare
 ```
 
 ---
 
-## D1 Integration
+## Ecosystem
 
-**Database:** `echo-engine-doctrines` (Cloudflare D1)
-**Table:** `doctrines`
+| System | Purpose |
+|--------|---------|
+| **Hephaestion Forge** | Software factory (this) |
+| **Daedalus Forge** | Manufacturing intelligence |
+| **EchoCAD** | Parametric CAD engine |
+| **FORGE-X Cloud** | Engine build pipeline |
+| **Echo Engine Runtime** | 2,632 knowledge engines, 202K+ doctrines |
+| **Echo AI Orchestrator** | Multi-LLM dispatch (29 workers) |
+| **Echo Shared Brain** | Universal memory layer |
 
-Doctrines are written directly to D1 via `npx wrangler d1 execute`:
-- Batched in groups of 10 (SQL file per batch)
-- Each INSERT includes all 18 columns + `created_at` timestamp
-- SQL values are properly escaped (single quotes doubled)
-- Temp SQL files are created and deleted after execution
-- Timeout: 60 seconds per batch
-
-**Purge query:** Removes doctrines where `reasoning IS NULL OR LENGTH(reasoning) < 50`
-
----
-
-## JSONL Event Log Format
-
-Every action is logged to a JSONL file for the monitor. Event types:
-
-| Type | Fields | Description |
-|------|--------|-------------|
-| `init` | status | Forge startup |
-| `queue` | total_engines, mode, provider_count | Engine queue loaded |
-| `start` | engine, domain | Engine forge begins |
-| `llm_call` | provider, model, status, elapsed_s, chars, error | Every LLM API call |
-| `batch` | batch, inserted, target, score_max, score_min, grade, candidates, passed | Batch completion |
-| `d1_insert` | inserted, batch_offset | D1 write success |
-| `d1_error` | error | D1 write failure |
-| `purge` | purged | Low-quality doctrine deletion |
-| `routing` | inserted | Routing doctrine generation |
-| `complete` | doctrines, qa_score, grade, elapsed_s, avg_score | Engine forge complete |
-| `progress` | progress, completed, grand_total, elapsed_min, eta_min | Periodic progress |
-| `provider_stats` | providers[] | Provider leaderboard (every 10 engines) |
-| `error` | error | Fatal engine error |
-| `done` | grand_total, engines_completed, engines_total, elapsed_min | Forge complete |
-
----
-
-## Backbone Engines
-
-43 backbone engines receive additional routing doctrines (5 per engine) that enable cross-domain query decomposition:
-
-| ID | Domain | ID | Domain |
-|----|--------|----|--------|
-| ACCT01 | Accounting & Auditing | MATH01 | Mathematics |
-| AERO01 | Aerospace Engineering | MED01 | Medical Sciences |
-| ARCH01 | Architecture & Urban Design | MINE01 | Mining Engineering |
-| ASTRO01 | Astronomy & Astrophysics | MUSIC01 | Music Theory & Production |
-| AUTO01 | Automotive Engineering | NET01 | Network Engineering |
-| BIO01 | Biomedical Engineering | NUC01 | Nuclear Engineering |
-| CHEM01 | Chemical Engineering | OPTIC01 | Optics & Photonics |
-| CRYPTO01 | Cryptocurrency & Blockchain | PETRO01 | Petroleum Engineering |
-| DRL01 | Drilling Engineering | PHIL01 | Philosophy & Ethics |
-| EE01 | Electrical Engineering | PHYS01 | Physics |
-| ENRG01 | Energy & Power Systems | PIPE01 | Pipeline Engineering |
-| ENV01 | Environmental Engineering | PROG01 | Programming & Software Eng. |
-| FOOD01 | Food Science & Technology | QUANT01 | Quantitative Finance |
-| FOREN01 | Forensic Science | RE01 | Real Estate |
-| GEO01 | Geotechnical Engineering | RENEW01 | Renewable Energy |
-| HIST01 | Historical Analysis | SCM01 | Supply Chain Management |
-| HVAC01 | HVAC Engineering | SOC01 | Sociology |
-| INS01 | Insurance & Risk Management | SPORT01 | Sports Science |
-| LING01 | Linguistics & NLP | TELE01 | Telecommunications |
-| MARINE01 | Marine & Naval Engineering | VET01 | Veterinary Science |
-| | | WAT01 | Water Resources Engineering |
-| | | WEATHER01 | Meteorology & Climate |
-| | | WELD01 | Welding Engineering |
-
----
-
-## Excluded Engines
-
-The following prefixes are excluded from forge runs (hand-built backbone engines with specialized logic):
-
-- **TIE** — Tax Intelligence Engine (10,918 lines, Gold Standard)
-- **ARCS** — Advanced Reasoning & Compliance System (20,157 lines)
-- **PIE** — Probate Intelligence Engine (17,317 lines)
-- **ET** — Echo Talk engines
-
----
-
-## Environment Setup
-
-### Required Environment Variables
-
-Create `.env.local` in the project root with:
-
-```env
-# Azure OpenAI (Tier 1 — FREE)
-# Loaded from config/profile_secrets.env.ps1
-
-# OpenRouter (18 paid keys)
-OPENROUTER_API_KEY_1=sk-or-...
-OPENROUTER_API_KEY_2=sk-or-...
-# ... up to OPENROUTER_API_KEY_18
-
-# Direct API providers
-DEEPSEEK_API_KEY=sk-...
-TOGETHER_API_KEY=...
-GROQ_API_KEY=gsk_...
-XAI_API_KEY=xai-...
-MISTRAL_API_KEY=...
-FIREWORKS_API_KEY=...
-SAMBANOVA_API_KEY=...
-
-# Gemini direct
-GEMINI_API_KEY_1=...
-GEMINI_API_KEY_2=...
-
-# Claude (disabled — subprocess timeout issues on Windows)
-# CLAUDE_CODE_OAUTH_TOKEN=...
-```
-
-### Dependencies
-
-- Python 3.11+
-- `npx wrangler` (Cloudflare CLI, authenticated)
-- No pip packages required (uses only stdlib: `urllib`, `json`, `subprocess`, `concurrent.futures`)
-
----
-
-## Target
-
-- **Echo Engine Runtime:** `echo-engine-runtime.bmcii1976.workers.dev`
-- **D1 Database:** `echo-engine-doctrines` (5eb5f53e)
-- **Current stats:** 2,632 engines, 202,751+ doctrines, 210 domain categories
-
----
-
-## Stats (2026-02-26)
-
-| Metric | Value |
-|--------|-------|
-| Engines in queue | 2,614 (excluding TIE/ARCS/PIE/ET) |
-| Doctrines in Runtime | 202,751+ |
-| Domain categories | 210 |
-| A++ grade rate | 99.1% on completed batches |
-| Average build time | ~5 min/engine |
-| Doctrines per engine | 40-65 (2 batches × 30 target + routing) |
-| LLM providers active | 37+ |
-| Concurrent LLM workers | 15 per batch |
+**GitHub:** [bobmcwilliams4/hephaestion-forge](https://github.com/bobmcwilliams4/hephaestion-forge)
+**Website:** [echo-ept.com](https://echo-ept.com)
 
 ---
 
 ## License
 
-Internal tool for Echo Omega Prime. Not licensed for external use.
+Proprietary. Copyright 2026 Echo Prime Technologies / Bobby Don McWilliams II. All rights reserved.
