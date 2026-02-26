@@ -31,6 +31,7 @@ interface Env {
   GROQ_API_KEY?: string;
   XAI_API_KEY?: string;
   OPENROUTER_API_KEY?: string;
+  ENGINE_RUNTIME: Fetcher;
   VERSION: string;
   SERVICE_NAME: string;
 }
@@ -172,6 +173,51 @@ const LLM_TIMEOUT_MS = 60000;
 const RATE_LIMIT_WINDOW_S = 60;
 const RATE_LIMIT_MAX_REQUESTS = 120;
 const CORS_ALLOWED_ORIGINS = ['https://echo-ept.com', 'https://echo-op.com', 'http://localhost:3000'];
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ENGINE RUNTIME INTEGRATION — 2,632 engines, 202,751 doctrines
+// ═══════════════════════════════════════════════════════════════════════════
+
+const ENGINE_RUNTIME_URL = 'https://echo-engine-runtime.bmcii1976.workers.dev';
+
+// Map project types to relevant engine domain categories
+const PROJECT_TYPE_TO_ENGINE_CATEGORIES: Record<string, string[]> = {
+  PYTHON_APP:          ['PROG', 'DEVOPS', 'TEST', 'SAAS'],
+  ELECTRON_APP:        ['PROG', 'UIUX', 'DESKTOP', 'TEST'],
+  WEB_APP:             ['WEBAPP', 'UIUX', 'PROG', 'SAAS', 'CLOUD'],
+  CLI_TOOL:            ['PROG', 'DEVOPS', 'TEST'],
+  MCP_SERVER:          ['PROG', 'AIML', 'CLOUD', 'DEVOPS'],
+  API_SERVICE:         ['PROG', 'CLOUD', 'DEVOPS', 'NET', 'SAAS'],
+  GUI_APPLICATION:     ['PROG', 'UIUX', 'DESKTOP', 'TEST'],
+  AUTOMATION_SCRIPT:   ['PROG', 'DEVOPS', 'DATENG', 'TEST'],
+  CLOUDFLARE_WORKER:   ['CLOUD', 'PROG', 'DEVOPS', 'NET', 'SAAS'],
+  DISCORD_BOT:         ['PROG', 'CLOUD', 'NET'],
+  TELEGRAM_BOT:        ['PROG', 'CLOUD', 'NET'],
+  BROWSER_EXTENSION:   ['WEBAPP', 'UIUX', 'PROG', 'CYBER'],
+  MOBILE_APP:          ['MOBILE', 'UIUX', 'PROG', 'TEST'],
+  CHROME_EXTENSION:    ['WEBAPP', 'UIUX', 'PROG', 'CYBER'],
+  VSCODE_EXTENSION:    ['PROG', 'DEVOPS', 'UIUX'],
+  GENERAL:             ['PROG', 'DEVOPS', 'CLOUD', 'TEST'],
+};
+
+// Map programming topics to engine categories for intelligence queries
+const TOPIC_TO_ENGINE_CATEGORIES: Record<string, string[]> = {
+  security:       ['CYBER', 'PROG', 'NET'],
+  database:       ['DATENG', 'PROG', 'CLOUD'],
+  testing:        ['TEST', 'PROG', 'DEVOPS'],
+  deployment:     ['DEVOPS', 'CLOUD', 'SAAS'],
+  architecture:   ['PROG', 'CLOUD', 'SAAS', 'DEVOPS'],
+  performance:    ['PROG', 'CLOUD', 'NET'],
+  ai:             ['AIML', 'DATENG', 'PROG'],
+  machine_learning: ['AIML', 'DATENG', 'PROG'],
+  frontend:       ['WEBAPP', 'UIUX', 'PROG'],
+  mobile:         ['MOBILE', 'UIUX', 'PROG'],
+  api:            ['PROG', 'NET', 'CLOUD'],
+  devops:         ['DEVOPS', 'CLOUD', 'PROG'],
+  microservices:  ['CLOUD', 'DEVOPS', 'NET', 'PROG'],
+  blockchain:     ['CRYPTO', 'PROG', 'CYBER'],
+  gamedev:        ['GAMEDEV', 'PROG', 'UIUX'],
+};
 
 // ═══════════════════════════════════════════════════════════════════════════
 // BUILD PIPELINE — 13 stages with quality gates
@@ -518,6 +564,68 @@ function jsonResponse(data: unknown, status: number = 200): Response {
     status,
     headers: { 'Content-Type': 'application/json' },
   });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ENGINE RUNTIME QUERY — Fetch doctrines from 2,632 engines
+// ═══════════════════════════════════════════════════════════════════════════
+
+interface EngineDoctrineResult {
+  doctrines: Array<{ topic: string; conclusion: string; confidence: number; engine_id: string; domain: string }>;
+  total: number;
+  categories: string[];
+}
+
+async function queryEngineRuntime(query: string, projectType: string, env: Env, limit: number = 5): Promise<EngineDoctrineResult> {
+  const categories = PROJECT_TYPE_TO_ENGINE_CATEGORIES[projectType] || PROJECT_TYPE_TO_ENGINE_CATEGORIES.GENERAL;
+  const empty: EngineDoctrineResult = { doctrines: [], total: 0, categories };
+
+  for (const cat of categories) {
+    try {
+      const url = `${ENGINE_RUNTIME_URL}/domain/${cat}/query?q=${encodeURIComponent(query.slice(0, 200))}&limit=${limit}`;
+      const resp = await env.ENGINE_RUNTIME.fetch(url, { headers: { 'Accept': 'application/json' } });
+      if (!resp.ok) continue;
+      const data = await resp.json() as { ok?: boolean; matches?: Array<{ topic?: string; conclusion?: string; confidence?: string; engine_id?: string; engine_name?: string; score?: number }> };
+      if (data.ok && data.matches && data.matches.length > 0) {
+        return {
+          doctrines: data.matches.map(r => ({
+            topic: r.topic ?? 'Unknown',
+            conclusion: r.conclusion ?? '',
+            confidence: r.score ?? 0.5,
+            engine_id: r.engine_id ?? '',
+            domain: cat,
+          })),
+          total: data.matches.length,
+          categories,
+        };
+      }
+    } catch { /* continue to next category */ }
+  }
+  return empty;
+}
+
+async function queryTopicDoctrines(query: string, topic: string, env: Env, limit: number = 3): Promise<string> {
+  const categories = TOPIC_TO_ENGINE_CATEGORIES[topic.toLowerCase()] || ['PROG', 'DEVOPS'];
+  for (const cat of categories) {
+    try {
+      const url = `${ENGINE_RUNTIME_URL}/domain/${cat}/query?q=${encodeURIComponent(query.slice(0, 200))}&limit=${limit}`;
+      const resp = await env.ENGINE_RUNTIME.fetch(url, { headers: { 'Accept': 'application/json' } });
+      if (!resp.ok) continue;
+      const data = await resp.json() as { ok?: boolean; matches?: Array<{ topic?: string; conclusion?: string; engine_id?: string; score?: number }> };
+      if (data.ok && data.matches && data.matches.length > 0) {
+        return data.matches.map(r => `[${r.engine_id} | ${r.topic}]: ${r.conclusion}`).join('\n');
+      }
+    } catch { /* continue */ }
+  }
+  return '';
+}
+
+function buildDoctrineContext(doctrines: EngineDoctrineResult): string {
+  if (doctrines.doctrines.length === 0) return '';
+  const lines = doctrines.doctrines.map(d =>
+    `[ENGINE ${d.engine_id} | ${d.domain} | confidence: ${(d.confidence * 100).toFixed(0)}%]\n${d.topic}: ${d.conclusion}`
+  );
+  return `\n\n═══ ECHO ENGINE RUNTIME DOCTRINE ENRICHMENT (${doctrines.total} blocks from ${doctrines.categories.join(', ')}) ═══\n${lines.join('\n\n')}\n═══ END DOCTRINE ENRICHMENT ═══`;
 }
 
 function corsHeaders(origin: string | null): Record<string, string> {
@@ -1031,10 +1139,14 @@ async function routeRequest(path: string, method: string, request: Request, env:
     const detected = detectProjectType(initialRequest);
     const archetype = PROJECT_ARCHETYPES[detected.type];
 
-    // Use LLM to analyze requirements
+    // Fetch Engine Runtime doctrines for this project type
+    const forgeDoctrines = await queryEngineRuntime(initialRequest, detected.type, env, 5);
+    const doctrineContext = buildDoctrineContext(forgeDoctrines);
+
+    // Use LLM to analyze requirements — enriched with engine doctrines
     const llmResult = await callLLM(
       `Analyze this software project request and extract structured requirements:\n\n"${initialRequest}"\n\nReturn JSON with: { features: string[], technical_requirements: string[], suggested_name: string, complexity: "simple"|"moderate"|"complex", estimated_files: number, estimated_lines: number }`,
-      'You are a senior software architect analyzing project requirements. Return valid JSON only.',
+      `You are a senior software architect analyzing project requirements. Return valid JSON only.${doctrineContext}`,
       env,
     );
 
@@ -1112,9 +1224,12 @@ async function routeRequest(path: string, method: string, request: Request, env:
     const project = await getProject(env.FORGE_PROJECTS, reviewMatch[1]);
     if (!project) return jsonResponse(makeError('Project not found', 'NOT_FOUND', 404), 404);
 
+    const projDoctrines = await queryEngineRuntime(`${project.name} ${project.description}`, project.projectType, env, 3);
+    const projEnrichment = buildDoctrineContext(projDoctrines);
+
     const reviewResult = await callLLM(
       `Review this ${project.projectType} project:\nName: ${project.name}\nDescription: ${project.description}\nLanguage: ${project.language}\nFramework: ${project.framework}\n\nProvide a structured code review with: overall_grade (A-F), strengths[], improvements[], security_concerns[], performance_notes[]`,
-      'You are a principal engineer conducting a rigorous code review. Be specific and actionable.',
+      `You are a principal engineer conducting a rigorous code review. Be specific and actionable.${projEnrichment}`,
       env,
     );
 
@@ -1146,9 +1261,13 @@ async function routeRequest(path: string, method: string, request: Request, env:
     const mandatoryList = profile ? `\nMandatory: ${profile.mandatoryPatterns.join(', ')}` : '';
     const antiList = profile ? `\nForbidden: ${profile.antiPatterns.join(', ')}` : '';
 
+    // Fetch relevant engine doctrines for this module
+    const modDoctrines = await queryTopicDoctrines(`${moduleName} ${description}`, language === 'python' ? 'api' : 'frontend', env, 3);
+    const modEnrichment = modDoctrines ? `\n\nRelevant engineering doctrines:\n${modDoctrines}` : '';
+
     const result = await callLLM(
       `Generate a production-quality ${language} module named "${moduleName}".\n\nPurpose: ${description}${patternList}${mandatoryList}${antiList}\n\nReturn ONLY the code, no explanations. Include type hints, docstrings, and error handling.`,
-      `You are a world-class ${language} developer writing SOVEREIGN CODE SUPREMACY standard code. Every function is typed. Every error is handled. No shortcuts.`,
+      `You are a world-class ${language} developer writing SOVEREIGN CODE SUPREMACY standard code. Every function is typed. Every error is handled. No shortcuts.${modEnrichment}`,
       env, 'azure', 8192,
     );
 
@@ -1161,9 +1280,12 @@ async function routeRequest(path: string, method: string, request: Request, env:
     const endpoints = (body.endpoints as Array<Record<string, string>>) ?? [];
     const auth = String(body.auth ?? 'api_key');
 
+    const apiDoctrines = await queryTopicDoctrines(`API ${framework} ${auth} endpoints`, 'api', env, 3);
+    const apiEnrichment = apiDoctrines ? `\n\nRelevant API engineering doctrines:\n${apiDoctrines}` : '';
+
     const result = await callLLM(
       `Generate a production API with ${framework} framework.\nEndpoints: ${JSON.stringify(endpoints)}\nAuth: ${auth}\n\nReturn complete, runnable code with: typed request/response models, input validation, error handling, health check, CORS, rate limiting.`,
-      'You write SOVEREIGN CODE SUPREMACY standard APIs. Every endpoint is validated. Every response is typed. No shortcuts.',
+      `You write SOVEREIGN CODE SUPREMACY standard APIs. Every endpoint is validated. Every response is typed. No shortcuts.${apiEnrichment}`,
       env, 'azure', 8192,
     );
 
@@ -1177,9 +1299,12 @@ async function routeRequest(path: string, method: string, request: Request, env:
     const coverageTarget = Number(body.coverage_target ?? 80);
 
     const profile = LANGUAGE_PROFILES[language];
+    const testDoctrines = await queryTopicDoctrines(`testing ${language} ${profile?.testFramework ?? 'pytest'}`, 'testing', env, 3);
+    const testEnrichment = testDoctrines ? `\n\nTesting engineering doctrines:\n${testDoctrines}` : '';
+
     const result = await callLLM(
       `Generate a comprehensive test suite for this ${language} code:\n\n\`\`\`${language}\n${code.slice(0, 4000)}\n\`\`\`\n\nUse ${profile?.testFramework ?? 'pytest'}. Target ${coverageTarget}% coverage. Include: unit tests, edge cases, error cases, integration tests where applicable. Use descriptive test names.`,
-      `You write thorough, production-quality tests. Every edge case is covered. Every error path is tested. Use ${profile?.testFramework ?? 'pytest'} framework.`,
+      `You write thorough, production-quality tests. Every edge case is covered. Every error path is tested. Use ${profile?.testFramework ?? 'pytest'} framework.${testEnrichment}`,
       env, 'azure', 8192,
     );
 
@@ -1242,9 +1367,12 @@ async function routeRequest(path: string, method: string, request: Request, env:
     const code = sanitize(String(body.code ?? ''), MAX_CODE_INPUT_LENGTH);
     const language = String(body.language ?? 'python');
 
+    const secDoctrines = await queryTopicDoctrines(`security audit ${language} vulnerabilities`, 'security', env, 3);
+    const secEnrichment = secDoctrines ? `\n\nSecurity engineering doctrines:\n${secDoctrines}` : '';
+
     const result = await callLLM(
       `Perform a security audit on this ${language} code:\n\n\`\`\`${language}\n${code.slice(0, 4000)}\n\`\`\`\n\nCheck for: injection (SQL, XSS, command), auth issues, secrets exposure, insecure crypto, CSRF, path traversal, SSRF, insecure deserialization. Return JSON: { vulnerabilities: [{ severity, type, line, description, fix }], overall_risk: "low"|"medium"|"high"|"critical", score: number }`,
-      'You are a senior security engineer performing a thorough code audit. Miss nothing.',
+      `You are a senior security engineer performing a thorough code audit. Miss nothing.${secEnrichment}`,
       env,
     );
 
@@ -1280,9 +1408,12 @@ async function routeRequest(path: string, method: string, request: Request, env:
     const context = sanitize(String(body.context ?? ''), 2000);
 
     const profile = LANGUAGE_PROFILES[language];
+    const reviewDoctrines = await queryTopicDoctrines(`code review ${language} best practices`, 'architecture', env, 3);
+    const reviewEnrichment = reviewDoctrines ? `\n\nEngineering review doctrines:\n${reviewDoctrines}` : '';
+
     const result = await callLLM(
       `Review this ${language} code as a principal engineer at a FAANG company:\n\n\`\`\`${language}\n${code.slice(0, 6000)}\n\`\`\`\n\nContext: ${context}\nMandatory patterns: ${profile?.mandatoryPatterns.join(', ') ?? 'standard best practices'}\nForbidden: ${profile?.antiPatterns.join(', ') ?? 'none specified'}\n\nProvide: overall_grade (A-F), issues[], strengths[], suggestions[], competitive_assessment (vs GPT-4.1/Gemini output quality)`,
-      'You are the most demanding code reviewer on Earth. FAANG principal engineer level. Be specific, actionable, and thorough. Grade honestly.',
+      `You are the most demanding code reviewer on Earth. FAANG principal engineer level. Be specific, actionable, and thorough. Grade honestly.${reviewEnrichment}`,
       env, 'azure', 4096,
     );
 
@@ -1331,9 +1462,12 @@ async function routeRequest(path: string, method: string, request: Request, env:
     const relationships = sanitize(String(body.relationships ?? ''), 2000);
     const scale = String(body.scale ?? 'medium');
 
+    const dbDoctrines = await queryTopicDoctrines(`database schema ${entities} ${scale}`, 'database', env, 3);
+    const dbEnrichment = dbDoctrines ? `\n\nDatabase engineering doctrines:\n${dbDoctrines}` : '';
+
     const result = await callLLM(
       `Design a database schema for:\nEntities: ${entities}\nRelationships: ${relationships}\nScale: ${scale}\n\nReturn: SQL CREATE TABLE statements, indexes, and an ER diagram in ASCII art. Use proper normalization, foreign keys, and constraints.`,
-      'You are a database architect designing schemas that are normalized, performant, and extensible.',
+      `You are a database architect designing schemas that are normalized, performant, and extensible.${dbEnrichment}`,
       env,
     );
 
@@ -1379,9 +1513,12 @@ async function routeRequest(path: string, method: string, request: Request, env:
     const description = sanitize(String(body.description ?? ''), 2000);
     const language = String(body.language ?? 'python');
 
+    const simDoctrines = await queryTopicDoctrines(`${description} ${language} projects`, 'architecture', env, 3);
+    const simEnrichment = simDoctrines ? `\n\nRelevant domain doctrines:\n${simDoctrines}` : '';
+
     const result = await callLLM(
       `Find similar open-source projects to: "${description}" in ${language}.\n\nReturn JSON array of: [{ name, url, stars, description, similarity_pct, key_differences }]`,
-      'You are an expert at finding relevant open-source projects. Return valid JSON only.',
+      `You are an expert at finding relevant open-source projects. Return valid JSON only.${simEnrichment}`,
       env,
     );
 
@@ -1403,9 +1540,12 @@ async function routeRequest(path: string, method: string, request: Request, env:
     const framework = String(body.framework ?? '');
     const topic = sanitize(String(body.topic ?? 'general'), 200);
 
+    const bpDoctrines = await queryTopicDoctrines(`${topic} ${language} ${framework} best practices`, topic, env, 3);
+    const bpEnrichment = bpDoctrines ? `\n\nRelevant engineering doctrines:\n${bpDoctrines}` : '';
+
     const result = await callLLM(
       `What are the current best practices for ${topic} in ${language}${framework ? ' with ' + framework : ''}?\n\nProvide actionable, specific guidance with code examples. Focus on production-quality patterns.`,
-      'You are a world-class developer sharing battle-tested best practices. Every recommendation is backed by experience.',
+      `You are a world-class developer sharing battle-tested best practices. Every recommendation is backed by experience.${bpEnrichment}`,
       env,
     );
 
@@ -1418,9 +1558,12 @@ async function routeRequest(path: string, method: string, request: Request, env:
     const toTech = sanitize(String(body.to_tech ?? ''), 100);
     const codebaseSize = String(body.codebase_size ?? 'medium');
 
+    const migDoctrines = await queryTopicDoctrines(`migration ${fromTech} to ${toTech}`, 'devops', env, 3);
+    const migEnrichment = migDoctrines ? `\n\nMigration engineering doctrines:\n${migDoctrines}` : '';
+
     const result = await callLLM(
       `Create a migration guide from ${fromTech} to ${toTech} for a ${codebaseSize} codebase.\n\nInclude: step-by-step plan, common pitfalls, code transformation examples, timeline estimate, risk assessment.`,
-      'You are a migration specialist who has done this exact transition many times. Be practical and specific.',
+      `You are a migration specialist who has done this exact transition many times. Be practical and specific.${migEnrichment}`,
       env, 'azure', 8192,
     );
 
@@ -1477,6 +1620,37 @@ async function routeRequest(path: string, method: string, request: Request, env:
       question,
       consensus: swarm.best.content,
       perspectives: swarm.responses.map(r => ({ provider: r.provider, response: r.content.slice(0, 500) })),
+    });
+  }
+
+  // ──── ENGINE RUNTIME ─────────────────────────────────────────────────
+  if (path === '/engines/query' && method === 'POST') {
+    const body = await request.json() as { query: string; project_type?: string; topic?: string; limit?: number };
+    const projectType = body.project_type || 'GENERAL';
+    const result = await queryEngineRuntime(body.query, projectType, env, body.limit || 5);
+    return jsonResponse({
+      success: true, ...result,
+      project_type_categories: PROJECT_TYPE_TO_ENGINE_CATEGORIES[projectType] || PROJECT_TYPE_TO_ENGINE_CATEGORIES.GENERAL,
+      engine_runtime: ENGINE_RUNTIME_URL, total_engines: 2632, total_doctrines: 202751,
+    });
+  }
+
+  if (path === '/engines/domains') {
+    return jsonResponse({
+      success: true,
+      project_type_mappings: PROJECT_TYPE_TO_ENGINE_CATEGORIES,
+      topic_mappings: TOPIC_TO_ENGINE_CATEGORIES,
+      engine_runtime: ENGINE_RUNTIME_URL,
+      total_engines: 2632, total_doctrines: 202751, domain_categories: 210,
+    });
+  }
+
+  if (path === '/engines/topic' && method === 'POST') {
+    const body = await request.json() as { query: string; topic: string; limit?: number };
+    const doctrines = await queryTopicDoctrines(body.query, body.topic, env, body.limit || 3);
+    return jsonResponse({
+      success: true, topic: body.topic, doctrines: doctrines || 'No doctrines found for this topic',
+      categories: TOPIC_TO_ENGINE_CATEGORIES[body.topic.toLowerCase()] || [],
     });
   }
 

@@ -23,5 +23,9 @@ database_id = "0c864d89-f803-49bf-b401-416c1578333b"
 binding = "BUILD_OUTPUT"
 bucket_name = "echo-build-plans"
 
+[[services]]
+binding = "ENGINE_RUNTIME"
+service = "echo-engine-runtime"
+
 [triggers]
 crons = []
