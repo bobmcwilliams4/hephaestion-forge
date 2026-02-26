@@ -3,7 +3,7 @@ main = "src/index.ts"
 compatibility_date = "2024-12-01"
 
 [vars]
-VERSION = "2.0.0"
+VERSION = "2.1.0"
 SERVICE_NAME = "hephaestion-forge"
 
 [[kv_namespaces]]
