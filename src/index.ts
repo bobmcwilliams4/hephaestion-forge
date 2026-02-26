@@ -536,6 +536,82 @@ const DESIGN_PATTERNS: DesignPattern[] = [
 ];
 
 // ═══════════════════════════════════════════════════════════════════════════
+// SOVEREIGN CODE SUPREMACY — Quality Standards from Megaprompt v1.0
+// Extracted from I:\PROMPT_TEMPLATES\SOVEREIGN_CODE_SUPREMACY_MEGAPROMPT_v1.0.md
+// These constants are injected into every LLM code-generation and review call
+// ═══════════════════════════════════════════════════════════════════════════
+
+const SOVEREIGN_BLACKLIST = `ABSOLUTE BLACKLIST — code containing ANY of these is rejected:
+- print() for logging → use structured logger (loguru/winston/pino)
+- String path concatenation → use pathlib.Path / path.join()
+- Bare except:/catch(e){} → catch specific exceptions
+- Hardcoded secrets/API keys → environment variables or vault
+- Magic numbers → named constants or config
+- Mutable default arguments → def f(x: list | None = None)
+- Global mutable state → dependency injection or context
+- sleep() in async → asyncio.sleep() / await delay()
+- requests in async → httpx.AsyncClient / fetch()
+- Manual JSON construction → Pydantic model_dump / Zod schema
+- SQL string interpolation → parameterized queries ALWAYS
+- eval()/exec() → NEVER under any circumstance
+- import * → explicit imports only
+- TODO/FIXME/HACK in shipped code → fix it or file an issue
+- Commented-out code → delete it, git remembers
+- Functions > 50 lines → decompose into focused helpers
+- Files > 500 lines → split into modules
+- Nested callbacks > 3 levels → flatten with async/await
+- any/Any type without justification → find the real type
+- Ignoring return values → handle or explicitly discard
+- Missing input validation on APIs → validate at boundary
+- No error response schema → typed error models with codes
+- Deployment without /health → health endpoint is MANDATORY
+- No README → README.md is the front door
+- console.log in production → structured logging or remove`;
+
+const SOVEREIGN_QUALITY_GATE = `COMPETITIVE QUALITY GATE — answer YES to ALL before shipping:
+1. Would a senior FAANG engineer approve this in code review?
+2. Could this survive a production incident at 3AM?
+3. Is every function typed with args, returns, and class attributes?
+4. Does every API endpoint validate input with typed schemas?
+5. Are errors handled with specific exceptions and recovery paths?
+6. Is there a /health endpoint returning structured status?
+7. Could a junior dev understand this codebase in 6 months?
+8. Is there a single hardcoded value anywhere? (Extract to config)
+9. Are all cross-cutting concerns (auth, logging, CORS) middleware?
+10. Is test coverage >= 80% on critical paths?`;
+
+const ENHANCEMENT_MATRIX_CATEGORIES: Record<string, string[]> = {
+  'CAT1-CODE': ['type_safety', 'error_handling', 'dry', 'solid', 'naming', 'modularity', 'no_dead_code', 'no_magic_numbers', 'design_patterns', 'refactoring'],
+  'CAT2-PERF': ['async_patterns', 'caching', 'lazy_loading', 'connection_pooling', 'query_optimization', 'bundle_size', 'profiling', 'memory', 'compression'],
+  'CAT3-SEC': ['input_validation', 'auth', 'secrets_management', 'xss_prevention', 'sqli_prevention', 'rate_limiting', 'cors', 'csrf', 'zero_trust', 'audit_log'],
+  'CAT4-UIUX': ['responsive', 'accessibility', 'loading_states', 'error_states', 'empty_states', 'dark_mode', 'animations', 'navigation'],
+  'CAT5-ARCH': ['separation_of_concerns', 'dependency_injection', 'api_design', 'extensibility', 'clean_layers', 'scalability', 'event_driven'],
+  'CAT6-RELIABLE': ['health_checks', 'retry_logic', 'circuit_breakers', 'graceful_degradation', 'monitoring', 'alerting', 'backups'],
+  'CAT7-TEST': ['unit_tests', 'integration_tests', 'coverage_80pct', 'test_naming', 'fixtures', 'mocking', 'e2e_tests', 'regression'],
+  'CAT8-DOCS': ['readme', 'ai_guide', 'docstrings', 'env_example', 'changelog', 'api_docs', 'adr'],
+  'CAT9-DEVOPS': ['ci_cd', 'docker', 'secrets_rotation', 'config_management', 'gitops', 'cost_optimization'],
+  'CAT10-DATA': ['validation', 'sanitization', 'migration', 'indexing', 'query_opt', 'privacy', 'encryption'],
+  'CAT11-INTEGR': ['api_versioning', 'idempotency', 'pagination', 'webhooks', 'rate_limiting', 'caching'],
+  'CAT12-NET': ['cdn', 'ssl_tls', 'http2', 'waf', 'ddos_protection', 'load_balancing'],
+  'CAT13-OBSERVE': ['structured_logging', 'metrics', 'tracing', 'dashboards', 'anomaly_detection', 'error_budgets'],
+  'CAT14-DX': ['onboarding', 'hot_reload', 'templates', 'cli', 'debugging', 'linting', 'formatting'],
+};
+
+function buildSovereignContext(mode: 'generate' | 'review' | 'security' | 'architecture'): string {
+  const base = `\n\n--- SOVEREIGN CODE SUPREMACY STANDARDS ---\n${SOVEREIGN_BLACKLIST}`;
+  if (mode === 'generate') {
+    return base + `\n\nGenerate code that passes ALL items in this quality gate:\n${SOVEREIGN_QUALITY_GATE}`;
+  }
+  if (mode === 'review') {
+    return base + `\n\nReview against these quality gates:\n${SOVEREIGN_QUALITY_GATE}\nScore each category (CAT1-CODE through CAT14-DX) on a 1-10 scale.`;
+  }
+  if (mode === 'security') {
+    return base + '\n\nApply CAT3-SEC checks: input_validation, auth, secrets_management, xss, sqli, rate_limiting, cors, csrf, zero_trust, audit_log.';
+  }
+  return base; // architecture mode
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // UTILITY FUNCTIONS — Pure, tested, reusable
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -1267,7 +1343,7 @@ async function routeRequest(path: string, method: string, request: Request, env:
 
     const result = await callLLM(
       `Generate a production-quality ${language} module named "${moduleName}".\n\nPurpose: ${description}${patternList}${mandatoryList}${antiList}\n\nReturn ONLY the code, no explanations. Include type hints, docstrings, and error handling.`,
-      `You are a world-class ${language} developer writing SOVEREIGN CODE SUPREMACY standard code. Every function is typed. Every error is handled. No shortcuts.${modEnrichment}`,
+      `You are a world-class ${language} developer writing SOVEREIGN CODE SUPREMACY standard code. Every function is typed. Every error is handled. No shortcuts.${modEnrichment}${buildSovereignContext('generate')}`,
       env, 'azure', 8192,
     );
 
@@ -1285,7 +1361,7 @@ async function routeRequest(path: string, method: string, request: Request, env:
 
     const result = await callLLM(
       `Generate a production API with ${framework} framework.\nEndpoints: ${JSON.stringify(endpoints)}\nAuth: ${auth}\n\nReturn complete, runnable code with: typed request/response models, input validation, error handling, health check, CORS, rate limiting.`,
-      `You write SOVEREIGN CODE SUPREMACY standard APIs. Every endpoint is validated. Every response is typed. No shortcuts.${apiEnrichment}`,
+      `You write SOVEREIGN CODE SUPREMACY standard APIs. Every endpoint is validated. Every response is typed. No shortcuts.${apiEnrichment}${buildSovereignContext('generate')}`,
       env, 'azure', 8192,
     );
 
@@ -1304,7 +1380,7 @@ async function routeRequest(path: string, method: string, request: Request, env:
 
     const result = await callLLM(
       `Generate a comprehensive test suite for this ${language} code:\n\n\`\`\`${language}\n${code.slice(0, 4000)}\n\`\`\`\n\nUse ${profile?.testFramework ?? 'pytest'}. Target ${coverageTarget}% coverage. Include: unit tests, edge cases, error cases, integration tests where applicable. Use descriptive test names.`,
-      `You write thorough, production-quality tests. Every edge case is covered. Every error path is tested. Use ${profile?.testFramework ?? 'pytest'} framework.${testEnrichment}`,
+      `You write thorough, production-quality tests. Every edge case is covered. Every error path is tested. Use ${profile?.testFramework ?? 'pytest'} framework.${testEnrichment}${buildSovereignContext('generate')}`,
       env, 'azure', 8192,
     );
 
@@ -1372,7 +1448,7 @@ async function routeRequest(path: string, method: string, request: Request, env:
 
     const result = await callLLM(
       `Perform a security audit on this ${language} code:\n\n\`\`\`${language}\n${code.slice(0, 4000)}\n\`\`\`\n\nCheck for: injection (SQL, XSS, command), auth issues, secrets exposure, insecure crypto, CSRF, path traversal, SSRF, insecure deserialization. Return JSON: { vulnerabilities: [{ severity, type, line, description, fix }], overall_risk: "low"|"medium"|"high"|"critical", score: number }`,
-      `You are a senior security engineer performing a thorough code audit. Miss nothing.${secEnrichment}`,
+      `You are a senior security engineer performing a thorough code audit. Miss nothing.${secEnrichment}${buildSovereignContext('security')}`,
       env,
     );
 
@@ -1413,11 +1489,37 @@ async function routeRequest(path: string, method: string, request: Request, env:
 
     const result = await callLLM(
       `Review this ${language} code as a principal engineer at a FAANG company:\n\n\`\`\`${language}\n${code.slice(0, 6000)}\n\`\`\`\n\nContext: ${context}\nMandatory patterns: ${profile?.mandatoryPatterns.join(', ') ?? 'standard best practices'}\nForbidden: ${profile?.antiPatterns.join(', ') ?? 'none specified'}\n\nProvide: overall_grade (A-F), issues[], strengths[], suggestions[], competitive_assessment (vs GPT-4.1/Gemini output quality)`,
-      `You are the most demanding code reviewer on Earth. FAANG principal engineer level. Be specific, actionable, and thorough. Grade honestly.${reviewEnrichment}`,
+      `You are the most demanding code reviewer on Earth. FAANG principal engineer level. Be specific, actionable, and thorough. Grade honestly.${reviewEnrichment}${buildSovereignContext('review')}`,
       env, 'azure', 4096,
     );
 
     return jsonResponse({ language, review: result.content, llm: { provider: result.provider, latencyMs: result.latencyMs } });
+  }
+
+  // ──── ENHANCEMENT MATRIX SWEEP (Sovereign Code Supremacy /enhance) ──
+  if (path === '/quality/enhance' && method === 'POST') {
+    const body = await request.json() as Record<string, unknown>;
+    const code = sanitize(String(body.code ?? ''), MAX_CODE_INPUT_LENGTH);
+    const language = String(body.language ?? 'python');
+    const projectName = sanitize(String(body.project ?? 'Unknown'), 100);
+
+    const catList = Object.entries(ENHANCEMENT_MATRIX_CATEGORIES).map(([id, checks]) => `${id}: ${checks.join(', ')}`).join('\n');
+
+    const result = await callLLM(
+      `Run a SOVEREIGN ENHANCEMENT MATRIX SWEEP on this ${language} code:\n\n\`\`\`${language}\n${code.slice(0, 6000)}\n\`\`\`\n\nScore EVERY category 1-10. For each, list issues found and fixes to apply.\n\nCategories:\n${catList}\n\nReturn JSON: { categories: [{ id: string, name: string, score: number, issues: string[], fixes: string[] }], overall_score: number, competitive_assessment: string, verdict: "SOVEREIGN_APPROVED"|"NEEDS_WORK" }`,
+      `You are the Enhancement Matrix — a 14-category quality sweep engine from the SOVEREIGN CODE SUPREMACY standard. Score ruthlessly but fairly. A score of 10 means literally perfect.${buildSovereignContext('review')}`,
+      env, 'azure', 8192,
+    );
+
+    let sweep: Record<string, unknown> = {};
+    try { const m = result.content.match(/\{[\s\S]*\}/); if (m) sweep = JSON.parse(m[0]); } catch { sweep = { raw: result.content }; }
+
+    return jsonResponse({
+      project: projectName, language, sweep,
+      matrix_version: 'SOVEREIGN_CODE_SUPREMACY_v1.0',
+      categories_evaluated: Object.keys(ENHANCEMENT_MATRIX_CATEGORIES).length,
+      llm: { provider: result.provider, latencyMs: result.latencyMs },
+    });
   }
 
   // ──── ARCHITECTURE ────────────────────────────────────────────────────
@@ -1467,7 +1569,7 @@ async function routeRequest(path: string, method: string, request: Request, env:
 
     const result = await callLLM(
       `Design a database schema for:\nEntities: ${entities}\nRelationships: ${relationships}\nScale: ${scale}\n\nReturn: SQL CREATE TABLE statements, indexes, and an ER diagram in ASCII art. Use proper normalization, foreign keys, and constraints.`,
-      `You are a database architect designing schemas that are normalized, performant, and extensible.${dbEnrichment}`,
+      `You are a database architect designing schemas that are normalized, performant, and extensible.${dbEnrichment}${buildSovereignContext('architecture')}`,
       env,
     );
 
